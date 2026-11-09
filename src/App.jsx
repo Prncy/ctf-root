@@ -228,14 +228,15 @@ function CreatorStudio() {
     { id: 2, kind: 'Learning Path', title: 'Web Security Foundations', status: 'Draft', points: 0, modules: 5, event: 'Independent' }
   ]);
   const [editing, setEditing] = useState(null);
+  const [editorOpen, setEditorOpen] = useState(false);
   const blank = { title: '', description: '', category: 'Web', totalPoints: '100', attemptPolicy: 'unlimited', maxAttempts: '3', deduction: '20', event: 'Independent', hints: [''], modules: [{ title: 'Module 1', description: '', points: '100', answer: '' }], files: [] };
   const [form, setForm] = useState(blank);
   const [message, setMessage] = useState('');
   const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
   const updateModule = (index, key, value) => setForm(prev => ({ ...prev, modules: prev.modules.map((m,i) => i === index ? { ...m, [key]: value } : m) }));
   const updateHint = (index, value) => setForm(prev => ({ ...prev, hints: prev.hints.map((h,i) => i === index ? value : h) }));
-  const startNew = (type) => { setKind(type); setEditing(null); setForm({ ...blank, totalPoints: type === 'Challenge' ? '100' : '0' }); setMessage(''); };
-  const editItem = (item) => { setKind(item.kind); setEditing(item.id); setForm({ ...blank, title: item.title, totalPoints: String(item.points), modules: Array.from({length: Math.max(1,item.modules)}, (_,i)=>({title:'Module '+(i+1),description:'',points:String(item.modules===1?item.points:Math.round(item.points/item.modules)),answer:''})) }); setMessage(''); };
+  const startNew = (type) => { setKind(type); setEditing(null); setEditorOpen(true); setForm({ ...blank, totalPoints: type === 'Challenge' ? '100' : '0' }); setMessage(''); };
+  const editItem = (item) => { setKind(item.kind); setEditing(item.id); setEditorOpen(true); setForm({ ...blank, title: item.title, totalPoints: String(item.points), modules: Array.from({length: Math.max(1,item.modules)}, (_,i)=>({title:'Module '+(i+1),description:'',points:String(item.modules===1?item.points:Math.round(item.points/item.modules)),answer:''})) }); setMessage(''); };
   const save = (publish) => {
     if (!form.title.trim() || !form.description.trim()) { setMessage('Add a title and description before saving.'); return; }
     const total = kind === 'Challenge' ? form.modules.reduce((sum,m)=>sum+(Number(m.points)||0),0) : 0;
@@ -243,6 +244,7 @@ function CreatorStudio() {
     setItems(prev => editing ? prev.map(x=>x.id===editing?next:x) : [next,...prev]);
     setMessage(publish ? 'Published in this prototype.' : 'Draft saved in this prototype.');
     setEditing(null);
+    setEditorOpen(false);
     setForm(blank);
   };
   const owned = items.filter(x=>x.kind===kind);
@@ -250,9 +252,9 @@ function CreatorStudio() {
     <div className="creator-studio-head"><div><div className="eyebrow">CREATOR STUDIO / YOUR CONTENT</div><h2>Your workspace</h2><p className="subheading">Create and manage only the content you own or have been assigned to an event.</p></div><div className="creator-studio-actions"><button className="primary-button" onClick={()=>startNew('Challenge')}><Plus size={15}/> New challenge</button><button className="secondary-button" onClick={()=>startNew('Learning Path')}><Plus size={15}/> New learning path</button></div></div>
     <div className="creator-permission-note"><Shield size={16}/><span><strong>Creator access</strong> — You can create, edit, publish, and manage your own challenges and learning paths. Event content is available only when an admin assigns you to that event. You cannot edit another creator’s content or manage platform users.</span></div>
     <div className="creator-studio-tabs"><button className={kind==='Challenge'?'selected':''} onClick={()=>{setKind('Challenge');setEditing(null);}}>My challenges</button><button className={kind==='Learning Path'?'selected':''} onClick={()=>{setKind('Learning Path');setEditing(null);}}>My learning paths</button></div>
-    {!editing && form.title==='' && <div className="panel creator-owned-list"><div className="panel-heading"><div><div className="eyebrow">YOUR CONTENT</div><h3>{kind==='Challenge'?'Challenges':'Learning paths'} ({owned.length})</h3></div><span className="tag">Demo data</span></div>{owned.map(item=><div className="creator-owned-row" key={item.id}><div className="creator-owned-icon">{kind==='Challenge'?<Flag size={17}/>:<BookOpen size={17}/>}</div><div className="creator-owned-copy"><strong>{item.title}</strong><small>{item.modules} {kind==='Challenge'?'modules':'lessons'} · {item.event}</small></div><span className={'creator-status '+item.status.toLowerCase()}>{item.status}</span><strong className="points">{item.points?item.points+' CP':'—'}</strong><button className="secondary-button" onClick={()=>editItem(item)}>Edit</button></div>)}{owned.length===0&&<div className="empty-inline">You have not created any {kind.toLowerCase()} yet.</div>}</div>}
-    {(editing!==null || form.title!=='') && <div className="panel creator-editor">
-      <div className="panel-heading"><div><div className="eyebrow">{editing?'EDIT YOUR CONTENT':'NEW '+kind.toUpperCase()}</div><h3>{editing?'Edit '+kind.toLowerCase():'Build a '+kind.toLowerCase()}</h3></div><button className="text-button" onClick={()=>{setEditing(null);setForm(blank);setMessage('');}}>Cancel</button></div>
+    {!editorOpen && <div className="panel creator-owned-list"><div className="panel-heading"><div><div className="eyebrow">YOUR CONTENT</div><h3>{kind==='Challenge'?'Challenges':'Learning paths'} ({owned.length})</h3></div><span className="tag">Demo data</span></div>{owned.map(item=><div className="creator-owned-row" key={item.id}><div className="creator-owned-icon">{kind==='Challenge'?<Flag size={17}/>:<BookOpen size={17}/>}</div><div className="creator-owned-copy"><strong>{item.title}</strong><small>{item.modules} {kind==='Challenge'?'modules':'lessons'} · {item.event}</small></div><span className={'creator-status '+item.status.toLowerCase()}>{item.status}</span><strong className="points">{item.points?item.points+' CP':'—'}</strong><button className="secondary-button" onClick={()=>editItem(item)}>Edit</button></div>)}{owned.length===0&&<div className="empty-inline">You have not created any {kind.toLowerCase()} yet.</div>}</div>}
+    {editorOpen && <div className="panel creator-editor">
+      <div className="panel-heading"><div><div className="eyebrow">{editing?'EDIT YOUR CONTENT':'NEW '+kind.toUpperCase()}</div><h3>{editing?'Edit '+kind.toLowerCase():'Build a '+kind.toLowerCase()}</h3></div><button className="text-button" onClick={()=>{setEditing(null);setEditorOpen(false);setForm(blank);setMessage('');}}>Cancel</button></div>
       <label className="creator-field"><span>Title</span><input value={form.title} onChange={e=>update('title',e.target.value)} placeholder="Give it a clear name"/></label>
       <label className="creator-field"><span>Description / introduction</span><textarea value={form.description} onChange={e=>update('description',e.target.value)} placeholder="Explain what players will learn or need to do."/></label>
       <div className="creator-form-grid"><label className="creator-field"><span>Category</span><select value={form.category} onChange={e=>update('category',e.target.value)}><option>Web</option><option>Cryptography</option><option>Forensics</option><option>Reverse Engineering</option><option>Miscellaneous</option></select></label><label className="creator-field"><span>Event assignment</span><select value={form.event} onChange={e=>update('event',e.target.value)}><option>Independent</option><option>Assigned event — admin approval required</option></select></label></div>
