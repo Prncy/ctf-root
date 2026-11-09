@@ -189,7 +189,7 @@ function DetailView({ detail, onBack }) {
   const path = type === 'path';
   const event = type === 'event';
   const pathProgress = completedLessons.length >= lessonTitles.length ? 100 : Math.round((completedLessons.length / lessonTitles.length) * 100);
-  const maxAttempts = Number.isInteger(item.maxAttempts) && item.maxAttempts > 0 ? item.maxAttempts : null;
+  const maxAttempts = item.banOnExhaustion && Number.isInteger(item.maxAttempts) && item.maxAttempts > 0 ? item.maxAttempts : null;
   const attemptsLeft = maxAttempts === null ? null : Math.max(0, maxAttempts - attemptCount);
   const submissionsBlocked = !!(maxAttempts !== null && attemptsLeft === 0 && item.banOnExhaustion);
   const subtitle = challenge ? item.category + ' · ' + item.difficulty + ' difficulty' : path ? item.tag + ' learning path · By ' + item.creator : item.type + ' · ' + item.date;
