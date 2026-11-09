@@ -31,6 +31,9 @@ const navGroups = [
 
 function App() {
   const [active, setActive] = useState('Overview');
+  const [role, setRole] = useState('player');
+  const visibleNavGroups = role === 'creator' ? [{ title: 'CREATOR WORKSPACE', items: [{ label: 'Creator Dashboard', icon: LayoutDashboard }, { label: 'Creator Studio', icon: Code2 }, { label: 'My Profile', icon: Compass }, { label: 'Settings', icon: Settings }] }] : role === 'admin' ? [{ title: 'ADMINISTRATION', items: [{ label: 'Admin Dashboard', icon: Shield }, { label: 'Events', icon: Trophy }, { label: 'Creators', icon: Users }, { label: 'Notifications', icon: Bell }, { label: 'Settings', icon: Settings }] }] : navGroups.map(g => ({ ...g, items: g.items.filter(i => i.label !== 'Creator Studio') }));
+  const switchRole = () => { const next = role === 'player' ? 'creator' : role === 'creator' ? 'admin' : 'player'; setRole(next); setActive(next === 'player' ? 'Overview' : next === 'creator' ? 'Creator Dashboard' : 'Admin Dashboard'); setNotice('Demo workspace: ' + next + '. Real permissions will be enforced by the backend.'); setDetail(null); };
   const [dark, setDark] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -53,13 +56,13 @@ function App() {
           <span className="brand-name">ctf<span>root</span></span>
           <button className="icon-button mobile-close" onClick={() => setSidebarOpen(false)} aria-label="Close menu"><X size={18}/></button>
         </div>
-        <button className="workspace-switch">
+        <button className="workspace-switch" onClick={switchRole} title="Switch demo workspace">
           <div className="workspace-avatar">CS</div>
-          <div className="workspace-copy"><strong>{currentUser.name}</strong><span>Player workspace</span></div>
+          <div className="workspace-copy"><strong>{currentUser.name}</strong><span>{role === 'player' ? 'Player workspace' : role === 'creator' ? 'Creator workspace' : 'Admin workspace'}</span></div>
           <ChevronDown size={15}/>
         </button>
         <div className="sidebar-scroll">
-          {navGroups.map(group => <div className="nav-group" key={group.title}>
+          {visibleNavGroups.map(group => <div className="nav-group" key={group.title}>
             <div className="nav-heading">{group.title}</div>
             {group.items.map(item => {
               const Icon = item.icon;
@@ -91,7 +94,7 @@ function App() {
 
         <div className="content">
           {notice && <div className="notice"><Sparkles size={16}/><span>{notice}</span><button onClick={() => setNotice('')} aria-label="Dismiss"><X size={15}/></button></div>}
-          {active === 'Overview' ? <Dashboard onNavigate={selectPage}/> : <PageView page={active} onNavigate={selectPage} filteredChallenges={filteredChallenges} detail={detail} onOpenDetail={(type, item) => setDetail({ type, item })} onCloseDetail={() => setDetail(null)}/>} 
+          {active === 'Overview' ? <Dashboard onNavigate={selectPage}/> : active === 'Creator Dashboard' ? <div className="panel"><h1>Creator dashboard</h1><p>Manage your own challenges and learning paths.</p><button className="primary-button" onClick={() => selectPage('Creator Studio')}>Open Creator Studio</button></div> : active === 'Admin Dashboard' ? <div className="panel"><h1>Admin dashboard</h1><p>Manage events, assign creators, moderate content and send notifications. Admin tools are prototype placeholders.</p></div> : <PageView page={active} onNavigate={selectPage} filteredChallenges={filteredChallenges} detail={detail} onOpenDetail={(type, item) => setDetail({ type, item })} onCloseDetail={() => setDetail(null)}/>} 
           <footer className="footer"><span>© 2026 CTF Root</span><span><a href="#about">About</a><a href="#guidelines">Guidelines</a><a href="#status">System status <i className="status-dot"/></a></span><span>Built for curious minds <span className="footer-heart">♥</span></span></footer>
         </div>
       </main>
@@ -239,7 +242,7 @@ function CreatorStudio() {
   const editItem = (item) => { setKind(item.kind); setEditing(item.id); setEditorOpen(true); setForm({ ...blank, title: item.title, totalPoints: String(item.points), modules: Array.from({length: Math.max(1,item.modules)}, (_,i)=>({title:'Module '+(i+1),description:'',points:String(item.modules===1?item.points:Math.round(item.points/item.modules)),answer:''})) }); setMessage(''); };
   const save = (publish) => {
     if (!form.title.trim() || !form.description.trim()) { setMessage('Add a title and description before saving.'); return; }
-    const total = kind === 'Challenge' ? form.modules.reduce((sum,m)=>sum+(Number(m.points)||0),0) : 0;
+    const total = form.modules.reduce((sum,m)=>sum+(Number(m.points)||0),0);
     const next = { id: editing || Date.now(), kind, title: form.title.trim(), status: publish ? 'Published' : 'Draft', points: total, modules: form.modules.length, event: form.event };
     setItems(prev => editing ? prev.map(x=>x.id===editing?next:x) : [next,...prev]);
     setMessage(publish ? 'Published in this prototype.' : 'Draft saved in this prototype.');
@@ -258,12 +261,8 @@ function CreatorStudio() {
       <label className="creator-field"><span>Title</span><input value={form.title} onChange={e=>update('title',e.target.value)} placeholder="Give it a clear name"/></label>
       <label className="creator-field"><span>Description / introduction</span><textarea value={form.description} onChange={e=>update('description',e.target.value)} placeholder="Explain what players will learn or need to do."/></label>
       <div className="creator-form-grid"><label className="creator-field"><span>Category</span><select value={form.category} onChange={e=>update('category',e.target.value)}><option>Web</option><option>Cryptography</option><option>Forensics</option><option>Reverse Engineering</option><option>Miscellaneous</option></select></label><label className="creator-field"><span>Event assignment</span><select value={form.event} onChange={e=>update('event',e.target.value)}><option>Independent</option><option>Assigned event — admin approval required</option></select></label></div>
-      {kind==='Challenge' && <>
-        <div className="creator-section-title"><div><strong>Scoring and attempts</strong><small>Choose how submissions are limited for this challenge.</small></div></div>
-        <div className="creator-form-grid"><label className="creator-field"><span>Attempt policy</span><select value={form.attemptPolicy} onChange={e=>update('attemptPolicy',e.target.value)}><option value="unlimited">Unlimited attempts</option><option value="ban">Limited attempts — lock submissions</option><option value="deduction">Limited attempts — deduct points</option></select></label>{form.attemptPolicy!=='unlimited'&&<label className="creator-field"><span>Allowed attempts</span><input type="number" min="1" value={form.maxAttempts} onChange={e=>update('maxAttempts',e.target.value)}/></label>}</div>
-        {form.attemptPolicy==='deduction'&&<label className="creator-field narrow"><span>Point deduction after attempts are exhausted (%)</span><input type="number" min="1" max="100" value={form.deduction} onChange={e=>update('deduction',e.target.value)}/><small>Applied to points earned from this challenge only.</small></label>}
-        <div className="creator-section-title"><div><strong>Modules and questions</strong><small>Each module can have its own task, answer, hints, and point value.</small></div><button className="secondary-button" onClick={()=>update('modules',[...form.modules,{title:'Module '+(form.modules.length+1),description:'',points:'0',answer:''}])}><Plus size={13}/> Add module</button></div>
-        {form.modules.map((module,index)=><div className="creator-module-editor" key={index}><div className="creator-module-head"><strong>Module {index+1}</strong>{form.modules.length>1&&<button className="text-button" onClick={()=>update('modules',form.modules.filter((_,i)=>i!==index))}>Remove</button>}</div><div className="creator-form-grid"><label className="creator-field"><span>Module title</span><input value={module.title} onChange={e=>updateModule(index,'title',e.target.value)}/></label><label className="creator-field"><span>Points for this module</span><input type="number" min="0" value={module.points} onChange={e=>updateModule(index,'points',e.target.value)}/></label></div><label className="creator-field"><span>Task / question description</span><textarea value={module.description} onChange={e=>updateModule(index,'description',e.target.value)} placeholder="Describe the task or question."/></label><label className="creator-field"><span>Correct answer / flag</span><input value={module.answer} onChange={e=>updateModule(index,'answer',e.target.value)} placeholder="CTFROOT{...}"/></label></div>)}
+      <div className="creator-section-title"><div><strong>Modules and questions</strong><small>Available for challenges and learning paths. Each question has its own answer, points and attempt policy.</small></div><button className="secondary-button" onClick={()=>update('modules',[...form.modules,{title:'Module '+(form.modules.length+1),description:'',points:'0',answer:'',attemptPolicy:'unlimited',maxAttempts:'3',deduction:'20'}])}><Plus size={13}/> Add module</button></div>
+        {form.modules.map((module,index)=><div className="creator-module-editor" key={index}><div className="creator-module-head"><strong>Module {index+1} · Question</strong>{form.modules.length>1&&<button className="text-button" onClick={()=>update('modules',form.modules.filter((_,i)=>i!==index))}>Remove</button>}</div><div className="creator-form-grid"><label className="creator-field"><span>Module title</span><input value={module.title} onChange={e=>updateModule(index,'title',e.target.value)}/></label><label className="creator-field"><span>Points for this module</span><input type="number" min="0" value={module.points} onChange={e=>updateModule(index,'points',e.target.value)}/></label></div><label className="creator-field"><span>Task / question description</span><textarea value={module.description} onChange={e=>updateModule(index,'description',e.target.value)} placeholder="Describe the task or question."/></label><label className="creator-field"><span>Correct answer / flag</span><input value={module.answer} onChange={e=>updateModule(index,'answer',e.target.value)} placeholder="CTFROOT{...}"/></label><div className="creator-form-grid"><label className="creator-field"><span>Attempt policy for this question</span><select value={module.attemptPolicy||'unlimited'} onChange={e=>updateModule(index,'attemptPolicy',e.target.value)}><option value="unlimited">Unlimited attempts</option><option value="ban">Limited attempts — lock this question</option><option value="deduction">Limited attempts — deduct points</option></select></label>{(module.attemptPolicy||'unlimited')!=='unlimited'&&<label className="creator-field"><span>Allowed attempts</span><input type="number" min="1" value={module.maxAttempts||'3'} onChange={e=>updateModule(index,'maxAttempts',e.target.value)}/></label>}</div>{module.attemptPolicy==='deduction'&&<label className="creator-field narrow"><span>Deduction after attempts are exhausted (%)</span><input type="number" min="1" max="100" value={module.deduction||'20'} onChange={e=>updateModule(index,'deduction',e.target.value)}/><small>Only affects points for this question.</small></label>}</div>)}
         <div className="creator-total-points">Total challenge points <strong>{form.modules.reduce((sum,m)=>sum+(Number(m.points)||0),0)} CP</strong></div>
       </>}
       <div className="creator-section-title"><div><strong>Hints</strong><small>Give players optional clues without revealing the answer.</small></div><button className="secondary-button" onClick={()=>update('hints',[...form.hints,''])}><Plus size={13}/> Add hint</button></div>
