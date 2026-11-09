@@ -20,9 +20,9 @@ export const paths = [
 ];
 
 export const challenges = [
-  { title: 'Cookie Crumble', category: 'Web', difficulty: 'Easy', points: 150, solves: 284, icon: '◈', color: 'blue' },
-  { title: 'A Very Strange Letter', category: 'Cryptography', difficulty: 'Medium', points: 250, solves: 126, icon: '⌘', color: 'purple' },
-  { title: 'Shadows in the Logs', category: 'Forensics', difficulty: 'Medium', points: 300, solves: 89, icon: '⌕', color: 'orange' },
+  { title: 'Cookie Crumble', category: 'Web', difficulty: 'Easy', points: 150, solves: 284, icon: '◈', color: 'blue', maxAttempts: 5, banOnExhaustion: false, demoFlag: 'CTFROOT{cookie_crumble}' },
+  { title: 'A Very Strange Letter', category: 'Cryptography', difficulty: 'Medium', points: 250, solves: 126, icon: '⌘', color: 'purple', maxAttempts: null, banOnExhaustion: false, demoFlag: 'CTFROOT{strange_letter}' },
+  { title: 'Shadows in the Logs', category: 'Forensics', difficulty: 'Medium', points: 300, solves: 89, icon: '⌕', color: 'orange', maxAttempts: 3, banOnExhaustion: true, demoFlag: 'CTFROOT{shadows_in_logs}' },
 ];
 
 export const leaderboard = [
