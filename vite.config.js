@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// GitHub Pages serves this project from /ctf-root/.
-// Vite still serves the app from / during local development.
+// GitHub Pages hosts this repository under /ctf-root/.
+// Keep the normal root path when running the app locally.
 export default defineConfig({
   plugins: [react()],
-  base: '/ctf-root/',
+  base: process.env.GITHUB_ACTIONS ? '/ctf-root/' : '/',
 });
