@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Activity, ArrowRight, BookOpen, Boxes, Code2, Flag, FolderKanban, Github, ListFilter, Bookmark, BookmarkCheck, Settings, Sparkles, Swords, Plus, ExternalLink } from 'lucide-react';
-import { currentUser, stats, paths, challenges, leaderboard, events } from '../../data.js';
+import { currentUser, stats, paths, challenges, leaderboard, events } from '../../data/index.js';
 import CreatorStudio from '../creator/CreatorStudio.jsx';
 
 export function PageView({ page, onNavigate, filteredChallenges, detail, onOpenDetail, onCloseDetail, bookmarks, onToggleBookmark }) {
