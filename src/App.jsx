@@ -304,7 +304,7 @@ function CreatorStudio() {
           {q.attemptPolicy === 'deduction' && <label className="creator-field narrow"><span>Deduction after attempts are exhausted (%)</span><input type="number" min="1" max="100" value={q.deduction} onChange={e => updateQuestion(mi,qi,'deduction',e.target.value)}/><small>Applies only to points earned for this question.</small></label>}
           <div className="creator-section-title"><div><strong>Hints</strong><small>Optional clues for this question.</small></div><button className="secondary-button" onClick={() => updateQuestion(mi,qi,'hints',[...q.hints,''])}><Plus size={13}/> Add hint</button></div>
           {q.hints.map((hint,hi) => <label className="creator-field" key={hi}><span>Hint {hi+1}</span><input value={hint} onChange={e => updateHint(mi,qi,hi,e.target.value)} placeholder="Write a helpful clue"/></label>)}
-          </div>
+          </div>}
         </div>)}
         </div>}
       </div>)}
