@@ -32,7 +32,7 @@ const navGroups = [
 function App() {
   const [active, setActive] = useState('Overview');
   const [authScreen, setAuthScreen] = useState(null);
-  const [bookmarks, setBookmarks] = useState({ challenges: ['Cookie Crumble', 'A Very Strange Letter'], paths: ['Web Security Foundations'] });
+  const [bookmarks, setBookmarks] = useState({ challenges: ['Cookie Crumble', 'A Very Strange Letter'], paths: ['Introduction to Cybersecurity'] });
   const toggleBookmark = (type, item) => setBookmarks(prev => { const key = type === 'challenge' ? 'challenges' : 'paths'; const saved = prev[key].includes(item.title); return { ...prev, [key]: saved ? prev[key].filter(x => x !== item.title) : [...prev[key], item.title] }; });
   const [role, setRole] = useState('player');
   const visibleNavGroups = role === 'creator' ? [{ title: 'CREATOR WORKSPACE', items: [{ label: 'Creator Dashboard', icon: LayoutDashboard }, { label: 'Creator Studio', icon: Code2 }, { label: 'My Profile', icon: Compass }, { label: 'Settings', icon: Settings }] }] : role === 'admin' ? [{ title: 'ADMINISTRATION', items: [{ label: 'Admin Dashboard', icon: Shield }, { label: 'Events', icon: Trophy }, { label: 'Creators', icon: Users }, { label: 'Notifications', icon: Bell }, { label: 'Settings', icon: Settings }] }] : navGroups.map(g => ({ ...g, items: g.items.filter(i => i.label !== 'Creator Studio') }));
