@@ -9,7 +9,7 @@ import {
   Menu, Moon, Search, Settings, Shield, Sparkles, Sun, Swords, Trophy, Users, X,
   Zap, Bell, Plus, ExternalLink
 } from 'lucide-react';
-import { currentUser, stats, paths, challenges, leaderboard, events } from '../data.js';
+import { currentUser, stats, paths, challenges, leaderboard, events } from '../data/index.js';
 
 const navGroups = [
   { title: 'WORKSPACE', items: [
