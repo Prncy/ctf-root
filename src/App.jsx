@@ -237,16 +237,20 @@ function CreatorStudio() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [form, setForm] = useState(blank);
   const [message, setMessage] = useState('');
+  const [expandedModules, setExpandedModules] = useState([true]);
+  const [expandedQuestions, setExpandedQuestions] = useState([[true]]);
   const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
   const updateModule = (mi, key, value) => setForm(prev => ({ ...prev, modules: prev.modules.map((m,i) => i === mi ? { ...m, [key]: value } : m) }));
   const updateQuestion = (mi, qi, key, value) => setForm(prev => ({ ...prev, modules: prev.modules.map((m,i) => i !== mi ? m : { ...m, questions: m.questions.map((q,j) => j === qi ? { ...q, [key]: value } : q) }) }));
   const updateHint = (mi, qi, hi, value) => setForm(prev => ({ ...prev, modules: prev.modules.map((m,i) => i !== mi ? m : { ...m, questions: m.questions.map((q,j) => j !== qi ? q : { ...q, hints: q.hints.map((h,k) => k === hi ? value : h) }) }) }));
   const totalPoints = form.modules.reduce((sum,m) => sum + m.questions.reduce((qsum,q) => qsum + (Number(q.points) || 0), 0), 0);
-  const startNew = (type) => { setKind(type); setEditing(null); setEditorOpen(true); setForm({ ...blank, modules: [blankModule(1)] }); setMessage(''); };
+  const startNew = (type) => { setKind(type); setEditing(null); setEditorOpen(true); setForm({ ...blank, modules: [blankModule(1)] }); setExpandedModules([true]); setExpandedQuestions([[true]]); setMessage(''); };
   const editItem = (item) => {
     setKind(item.kind); setEditing(item.id); setEditorOpen(true);
     const moduleCount = Math.max(1,item.modules);
     setForm({ ...blank, title: item.title, description: 'Edit the introduction and learning content here.', modules: Array.from({length:moduleCount},(_,mi) => ({ ...blankModule(mi+1), questions: [blankQuestion()] })) });
+    setExpandedModules(Array(moduleCount).fill(true));
+    setExpandedQuestions(Array.from({length:moduleCount}, () => [true]));
     setMessage('Sample content loaded. You can edit its modules and questions.');
   };
   const save = (publish) => {
@@ -267,14 +271,16 @@ function CreatorStudio() {
       <label className="creator-field"><span>Title</span><input value={form.title} onChange={e => update('title',e.target.value)} placeholder="Give it a clear name"/></label>
       <label className="creator-field"><span>{kind === 'Learning Path' ? 'Introduction and learning objectives' : 'Challenge description'}</span><textarea value={form.description} onChange={e => update('description',e.target.value)} placeholder="Explain what players will learn or need to do."/></label>
       <div className="creator-form-grid"><label className="creator-field"><span>Category</span><select value={form.category} onChange={e => update('category',e.target.value)}><option>Web</option><option>Cryptography</option><option>Forensics</option><option>Reverse Engineering</option><option>Miscellaneous</option></select></label><label className="creator-field"><span>Event assignment</span><select value={form.event} onChange={e => update('event',e.target.value)}><option>Independent</option><option>Assigned event — admin approval required</option></select></label></div>
-      <div className="creator-section-title"><div><strong>Modules</strong><small>{kind === 'Learning Path' ? 'Build guided modules. Each module can contain multiple learning questions.' : 'Group related questions. Each module can contain multiple questions.'}</small></div><button className="secondary-button" onClick={() => update('modules',[...form.modules,blankModule(form.modules.length+1)])}><Plus size={13}/> Add module</button></div>
+      <div className="creator-section-title"><div><strong>Modules</strong><small>{kind === 'Learning Path' ? 'Build guided modules. Each module can contain multiple learning questions.' : 'Group related questions. Each module can contain multiple questions.'}</small></div><button className="secondary-button" onClick={() => { update('modules',[...form.modules,blankModule(form.modules.length+1)]); setExpandedModules(prev => [...prev,true]); setExpandedQuestions(prev => [...prev,[true]]); }}><Plus size={13}/> Add module</button></div>
       {form.modules.map((module,mi) => <div className="creator-module-editor" key={mi}>
-        <div className="creator-module-head"><strong>Module {mi+1}</strong>{form.modules.length > 1 && <button className="text-button" onClick={() => update('modules',form.modules.filter((_,i) => i !== mi))}>Remove module</button>}</div>
+        <div className="creator-module-head"><button type="button" className="creator-collapse-trigger" aria-expanded={!!expandedModules[mi]} onClick={() => setExpandedModules(prev => prev.map((open,i) => i === mi ? !open : open))}>{expandedModules[mi] ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}<strong>Module {mi+1} · {module.title || 'Untitled module'}</strong><span>{module.questions.length} question{module.questions.length === 1 ? '' : 's'}</span></button>{form.modules.length > 1 && <button className="text-button" onClick={() => { update('modules',form.modules.filter((_,i) => i !== mi)); setExpandedModules(prev => prev.filter((_,i) => i !== mi)); setExpandedQuestions(prev => prev.filter((_,i) => i !== mi)); }}>Remove module</button>}</div>
+        {expandedModules[mi] && <div className="creator-collapsible-content">
         <label className="creator-field"><span>Module title</span><input value={module.title} onChange={e => updateModule(mi,'title',e.target.value)} placeholder="Module title"/></label>
         <label className="creator-field"><span>Module introduction / instructions</span><textarea value={module.description} onChange={e => updateModule(mi,'description',e.target.value)} placeholder="Explain this module."/></label>
-        <div className="creator-section-title"><div><strong>Questions ({module.questions.length})</strong><small>Set scoring and attempt rules separately for every question.</small></div><button className="secondary-button" onClick={() => updateModule(mi,'questions',[...module.questions,blankQuestion()])}><Plus size={13}/> Add question</button></div>
-        {module.questions.map((q,qi) => <div className="creator-module-editor" key={qi}>
-          <div className="creator-module-head"><strong>Question {qi+1}</strong>{module.questions.length > 1 && <button className="text-button" onClick={() => updateModule(mi,'questions',module.questions.filter((_,i) => i !== qi))}>Remove question</button>}</div>
+        <div className="creator-section-title"><div><strong>Questions ({module.questions.length})</strong><small>Set scoring and attempt rules separately for every question.</small></div><button className="secondary-button" onClick={() => { updateModule(mi,'questions',[...module.questions,blankQuestion()]); setExpandedQuestions(prev => prev.map((list,i) => i === mi ? [...list,true] : list)); }}><Plus size={13}/> Add question</button></div>
+        {module.questions.map((q,qi) => <div className="creator-question-editor" key={qi}>
+          <div className="creator-module-head"><button type="button" className="creator-collapse-trigger" aria-expanded={!!expandedQuestions[mi]?.[qi]} onClick={() => setExpandedQuestions(prev => prev.map((list,i) => i === mi ? list.map((open,j) => j === qi ? !open : open) : list))}>{expandedQuestions[mi]?.[qi] ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}<strong>Question {qi+1} · {q.title || 'Untitled question'}</strong><span>{Number(q.points) || 0} CP</span></button>{module.questions.length > 1 && <button className="text-button" onClick={() => { updateModule(mi,'questions',module.questions.filter((_,i) => i !== qi)); setExpandedQuestions(prev => prev.map((list,i) => i === mi ? list.filter((_,j) => j !== qi) : list)); }}>Remove question</button>}</div>
+          {expandedQuestions[mi]?.[qi] && <div className="creator-collapsible-content">
           <label className="creator-field"><span>Question title</span><input value={q.title} onChange={e => updateQuestion(mi,qi,'title',e.target.value)} placeholder="e.g. Identify the vulnerable cookie"/></label>
           <label className="creator-field"><span>Question / task description</span><textarea value={q.description} onChange={e => updateQuestion(mi,qi,'description',e.target.value)} placeholder="Describe the task. For learning paths, include the explanation and guidance."/></label>
           <div className="creator-form-grid"><label className="creator-field"><span>Correct answer / flag</span><input value={q.answer} onChange={e => updateQuestion(mi,qi,'answer',e.target.value)} placeholder="Expected answer or flag"/></label><label className="creator-field"><span>Question points</span><input type="number" min="0" value={q.points} onChange={e => updateQuestion(mi,qi,'points',e.target.value)}/></label></div>
@@ -282,7 +288,9 @@ function CreatorStudio() {
           {q.attemptPolicy === 'deduction' && <label className="creator-field narrow"><span>Deduction after attempts are exhausted (%)</span><input type="number" min="1" max="100" value={q.deduction} onChange={e => updateQuestion(mi,qi,'deduction',e.target.value)}/><small>Applies only to points earned for this question.</small></label>}
           <div className="creator-section-title"><div><strong>Hints</strong><small>Optional clues for this question.</small></div><button className="secondary-button" onClick={() => updateQuestion(mi,qi,'hints',[...q.hints,''])}><Plus size={13}/> Add hint</button></div>
           {q.hints.map((hint,hi) => <label className="creator-field" key={hi}><span>Hint {hi+1}</span><input value={hint} onChange={e => updateHint(mi,qi,hi,e.target.value)} placeholder="Write a helpful clue"/></label>)}
+          </div>
         </div>)}
+        </div>}
       </div>)}
       <div className="creator-total-points">Total {kind === 'Challenge' ? 'challenge' : 'learning path'} points <strong>{totalPoints} CP</strong><small>Automatically calculated from every question across all modules.</small></div>
       <div className="creator-section-title"><div><strong>Files</strong><small>File uploads will be connected when persistent storage is implemented.</small></div><span className="tag">Coming later</span></div>
