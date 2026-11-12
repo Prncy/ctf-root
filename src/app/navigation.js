@@ -1,6 +1,6 @@
 import { Activity, BookOpen, Flag, Trophy, Users, Award, Boxes, FolderKanban, Compass, Code2, Sparkles } from 'lucide-react';
 
-const navGroups = [
+export const navGroups = [
   { title: 'WORKSPACE', items: [
     { label: 'Overview', icon: LayoutDashboard },
     { label: 'My Progress', icon: Activity },
