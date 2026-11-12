@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import AdminEvents from '../features/admin/AdminEvents.jsx';
 import { PublicHome, AuthPage } from '../features/auth/AuthPages.jsx';
 import { PageView } from '../features/player/PlayerPages.jsx';
+import { navGroups } from './navigation.js';
 import Dashboard from '../features/player/Dashboard.jsx';
 import {
   Activity, ArrowDownRight, ArrowRight, Award, BookOpen, Bot, Boxes, ChevronDown,
@@ -11,27 +12,6 @@ import {
   Zap, Bell, Plus, ExternalLink
 } from 'lucide-react';
 import { currentUser, stats, paths, challenges, leaderboard, events } from '../data/index.js';
-
-const navGroups = [
-  { title: 'WORKSPACE', items: [
-    { label: 'Overview', icon: LayoutDashboard },
-    { label: 'My Progress', icon: Activity },
-    { label: 'Challenges', icon: Flag, count: 'New' },
-    { label: 'Learning Paths', icon: BookOpen },
-    { label: 'Events', icon: Trophy },
-  ]},
-  { title: 'DISCOVER', items: [
-    { label: 'Creators', icon: Users },
-    { label: 'Leaderboard', icon: Award },
-    { label: 'Vaults', icon: Boxes },
-    { label: 'Bookmarks', icon: FolderKanban },
-  ]},
-  { title: 'YOUR SPACE', items: [
-    { label: 'My Profile', icon: Compass },
-    { label: 'Creator Studio', icon: Code2 },
-    { label: 'Subscriptions', icon: Sparkles, soon: true },
-  ]},
-];
 
 function App() {
   const [active, setActive] = useState('Overview');
