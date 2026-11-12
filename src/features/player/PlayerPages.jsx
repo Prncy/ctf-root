@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CreatorStudio, Activity, ArrowRight, BookOpen, Boxes, Code2, Flag, FolderKanban, Github, ListFilter, Bookmark, BookmarkCheck, Settings, Sparkles, Swords, Plus, ExternalLink } from 'lucide-react';
+import { Activity, ArrowRight, BookOpen, Boxes, Code2, Flag, FolderKanban, Github, ListFilter, Bookmark, BookmarkCheck, Settings, Sparkles, Swords, Plus, ExternalLink } from 'lucide-react';
 import { currentUser, stats, paths, challenges, leaderboard, events } from '../../data.js';
 import CreatorStudio from '../creator/CreatorStudio.jsx';
 
