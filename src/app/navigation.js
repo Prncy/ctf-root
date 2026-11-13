@@ -1,6 +1,6 @@
 import {
   Activity, Award, BookOpen, Boxes, Code2, Compass, Flag, FolderKanban,
-  LayoutDashboard, Sparkles, Trophy, Users, Bell, Shield, Settings
+  LayoutDashboard, Sparkles, Trophy, Users, Shield, Settings, CreditCard
 } from 'lucide-react';
 
 export const navGroups = [
@@ -20,7 +20,8 @@ export const navGroups = [
   { title: 'YOUR SPACE', items: [
     { label: 'My Profile', icon: Compass },
     { label: 'Creator Studio', icon: Code2 },
-    { label: 'Subscriptions', icon: Sparkles, soon: true },
+    { label: 'Subscriptions', icon: Sparkles },
+    { label: 'Settings', icon: Settings },
   ]},
 ];
 
@@ -41,7 +42,7 @@ export function getVisibleNavGroups(role) {
       { label: 'Admin Dashboard', icon: Shield },
       { label: 'Events', icon: Trophy },
       { label: 'Creators', icon: Users },
-      { label: 'Notifications', icon: Bell },
+      { label: 'Subscriptions', icon: CreditCard },
       { label: 'Settings', icon: Settings },
     ],
   }];
