@@ -1,4 +1,7 @@
-import { Activity, BookOpen, Flag, Trophy, Users, Award, Boxes, FolderKanban, Compass, Code2, Sparkles } from 'lucide-react';
+import {
+  Activity, Award, BookOpen, Boxes, Code2, Compass, Flag, FolderKanban,
+  LayoutDashboard, Sparkles, Trophy, Users, Bell, Shield, Settings
+} from 'lucide-react';
 
 export const navGroups = [
   { title: 'WORKSPACE', items: [
@@ -20,3 +23,31 @@ export const navGroups = [
     { label: 'Subscriptions', icon: Sparkles, soon: true },
   ]},
 ];
+
+export function getVisibleNavGroups(role) {
+  if (role === 'creator') return [{
+    title: 'CREATOR WORKSPACE',
+    items: [
+      { label: 'Creator Dashboard', icon: LayoutDashboard },
+      { label: 'Creator Studio', icon: Code2 },
+      { label: 'My Profile', icon: Compass },
+      { label: 'Settings', icon: Settings },
+    ],
+  }];
+
+  if (role === 'admin') return [{
+    title: 'ADMINISTRATION',
+    items: [
+      { label: 'Admin Dashboard', icon: Shield },
+      { label: 'Events', icon: Trophy },
+      { label: 'Creators', icon: Users },
+      { label: 'Notifications', icon: Bell },
+      { label: 'Settings', icon: Settings },
+    ],
+  }];
+
+  return navGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => item.label !== 'Creator Studio'),
+  }));
+}
