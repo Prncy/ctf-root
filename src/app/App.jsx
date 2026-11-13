@@ -6,7 +6,8 @@ import { getVisibleNavGroups } from './navigation.js';
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 import Dashboard from '../features/player/Dashboard.jsx';
-import { Sparkles } from 'lucide-react';import { challenges } from '../data/index.js';
+import { Sparkles, X } from 'lucide-react';
+import { challenges } from '../data/index.js';
 
 function App() {
   const [active, setActive] = useState('Overview');
@@ -57,7 +58,7 @@ function App() {
         setNotice={setNotice}
         signOut={() => { setHasEntered(false); setAuthScreen(null); }}
       />
-      {authScreen ? <AuthPage initialMode={authScreen} onSuccess={() => { setAuthScreen(null); setNotice('Demo sign-in successful. Connect the backend for real accounts.'); }} onSwitch={setAuthScreen}/> : <main className="main">      {authScreen ? <AuthPage initialMode={authScreen} onSuccess={() => { setAuthScreen(null); setNotice('Demo sign-in successful. Connect the backend for real accounts.'); }} onSwitch={setAuthScreen}/> : <main className="main">
+      {authScreen ? <AuthPage initialMode={authScreen} onSuccess={() => { setAuthScreen(null); setNotice('Demo sign-in successful. Connect the backend for real accounts.'); }} onSwitch={setAuthScreen}/> : <main className="main">
         <Topbar active={active} query={query} setQuery={setQuery} dark={dark} setDark={setDark} setSidebarOpen={setSidebarOpen} setNotice={setNotice}/>
 
         <div className="content">
