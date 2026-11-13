@@ -38,6 +38,7 @@ function App() {
   const selectPage = (label) => {
     if (label !== active || detail) window.history.pushState({ ctfRoot: true, page: label }, '', window.location.pathname + window.location.search);
     setActive(label);
+    setDetail(null);
     setSidebarOpen(false);
     if (label === 'Subscriptions') setNotice('Subscriptions are coming soon. We’re working on something good.');
     else setNotice('');
