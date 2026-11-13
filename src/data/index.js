@@ -19,6 +19,13 @@ export const paths = [
   { title: 'Cryptography: The Essentials', creator: 'CipherLab', difficulty: 'Hard', progress: 18, lessons: '2 of 10 lessons', color: 'purple', tag: 'Beginner', hasLab: false, files: [{ name: 'cipher_reference.txt', type: 'TXT', size: '8 KB' }] },
 ];
 
+
+export const creators = [
+  { username: 'rootacademy', name: 'Root Academy', focus: 'Web security & fundamentals', bio: 'Building approachable cybersecurity challenges and guided learning experiences for curious beginners.', avatar: 'RA' },
+  { username: 'nullbyte', name: 'NullByte', focus: 'Offensive security & forensics', bio: 'Creating practical investigation and offensive security challenges that reward careful thinking.', avatar: 'NB' },
+  { username: 'cipherlab', name: 'CipherLab', focus: 'Cryptography & puzzles', bio: 'Turning cryptography concepts and problem-solving puzzles into hands-on learning experiences.', avatar: 'CL' },
+];
+
 export const challenges = [
   { title: 'Cookie Crumble', category: 'Web', tags: ['XOR', 'Cryptography'], difficulty: 'Easy', isPremium: false, creatorUsername: 'rootacademy', solved: true, points: 150, solves: 284, icon: '◈', color: 'blue', maxAttempts: 5, banOnExhaustion: true, hasLab: false, files: [{ name: 'cookie_capture.pcap', type: 'PCAP', size: '284 KB' }, { name: 'challenge_notes.txt', type: 'TXT', size: '4 KB' }], modules: [{ title: 'Level 1 · Inspect the cookie', description: 'Inspect the supplied request and identify the interesting cookie value.', points: 50, demoFlag: 'CTFROOT{cookie_level_one}' }, { title: 'Level 2 · Crumble the protection', description: 'Investigate how the cookie is protected and recover the hidden value.', points: 100, demoFlag: 'CTFROOT{cookie_crumble}' }] },
   { title: 'A Very Strange Letter', category: 'Cryptography', difficulty: 'Medium', isPremium: true, creatorUsername: 'cipherlab', solved: false, points: 250, solves: 126, icon: '⌘', color: 'purple', maxAttempts: null, banOnExhaustion: false, hasLab: false, files: [], modules: [{ title: 'Level 1 · The unusual message', description: 'Identify the transformation used to encode the message.', points: 100, demoFlag: 'CTFROOT{strange_letter_one}' }, { title: 'Level 2 · Decode the letter', description: 'Recover the final plaintext and submit its flag.', points: 150, demoFlag: 'CTFROOT{strange_letter}' }] },
