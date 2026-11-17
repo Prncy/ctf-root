@@ -53,7 +53,7 @@ export default function CreatorDashboard({ items = [], assignedEvents = [], even
 
     <section className="panel creator-recent-panel">
       <div className="panel-heading"><div><div className="eyebrow">RECENT WORK</div><h3>Your latest content</h3></div><button className="text-button" onClick={() => onNavigate('Creator Studio')}>Manage content <ArrowRight size={13}/></button></div>
-      {recent.length ? <div className="creator-recent-list">{recent.map(item => <div className="creator-recent-row" key={item.id}><div className="creator-recent-icon">{item.kind === 'Challenge' ? <Flag size={16}/> : <BookOpen size={16}/>}</div><div className="creator-recent-copy"><strong>{item.title}</strong><small>{item.kind} · {item.points || 0} CP · {item.moduleCount || 0} modules</small></div><span className={'creator-status ' + String(item.status || 'Draft').toLowerCase().replace(/\\s+/g,'-')}>{item.status || 'Draft'}</span></div>)}</div> : <div className="creator-dashboard-empty">Your first challenge or learning path will show up here.</div>}
+      {recent.length ? <div className="creator-recent-list">{recent.map(item => <div className="creator-recent-row" key={item.id}><div className="creator-recent-icon">{item.kind === 'Challenge' ? <Flag size={16}/> : <BookOpen size={16}/>}</div><div className="creator-recent-copy"><strong>{item.title}</strong><small>{item.kind} · {item.points || 0} CP · {item.moduleCount || 0} modules</small></div><span className={'creator-status ' + String(item.status || 'Draft').toLowerCase().replace(/\s+/g,'-')}>{item.status || 'Draft'}</span></div>)}</div> : <div className="creator-dashboard-empty">Your first challenge or learning path will show up here.</div>}
     </section>
   </div>;
 }
