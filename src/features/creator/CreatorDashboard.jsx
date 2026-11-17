@@ -8,7 +8,6 @@ export default function CreatorDashboard({ items = [], assignedEvents = [], even
   const pending = eventChallenges.filter(item => item.status === 'Pending review').length;
   const reviewed = eventChallenges.filter(item => item.status === 'Approved' || item.status === 'Changes requested').length;
   const recent = [...items].slice(0, 4);
-  const firstName = 'CyberScythe';
 
   return <div className="page-enter creator-dashboard">
     <div className="creator-dashboard-hero">
