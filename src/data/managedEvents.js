@@ -1,0 +1,30 @@
+export const initialManagedEvents = [
+  {
+    id: 1,
+    name: 'Root Access CTF',
+    format: 'Team',
+    status: 'Scheduled',
+    publicationStatus: 'Published',
+    date: '22 Nov 2026 · 09:00',
+    limit: 5,
+    assignedCreators: ['nullbyte', 'rootacademy'],
+    rounds: [{ name: 'Qualifiers' }, { name: 'Semi-finals' }, { name: 'Final' }],
+    teams: [
+      { name: 'Packet Pirates', members: 4, score: 820 },
+      { name: 'Null Terminators', members: 3, score: 760 },
+      { name: 'Byte Me', members: 4, score: 690 },
+    ],
+  },
+  {
+    id: 2,
+    name: 'Solo Web Sprint',
+    format: 'Individual',
+    status: 'Registration open',
+    publicationStatus: 'Published',
+    date: '28 Nov 2026 · 10:00',
+    limit: null,
+    assignedCreators: ['cipherlab'],
+    rounds: [],
+    teams: [],
+  },
+];
