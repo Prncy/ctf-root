@@ -24,6 +24,7 @@ export const creators = [
   { username: 'rootacademy', name: 'Root Academy', focus: 'Web security & fundamentals', bio: 'Building approachable cybersecurity challenges and guided learning experiences for curious beginners.', avatar: 'RA' },
   { username: 'nullbyte', name: 'NullByte', focus: 'Offensive security & forensics', bio: 'Creating practical investigation and offensive security challenges that reward careful thinking.', avatar: 'NB' },
   { username: 'cipherlab', name: 'CipherLab', focus: 'Cryptography & puzzles', bio: 'Turning cryptography concepts and problem-solving puzzles into hands-on learning experiences.', avatar: 'CL' },
+  { username: 'cyberscythe', name: 'CyberScythe', focus: 'Web security & CTF development', bio: 'Building practical cybersecurity challenges and learning experiences.', avatar: 'CS' },
 ];
 
 export const challenges = [
