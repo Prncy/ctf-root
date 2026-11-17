@@ -107,6 +107,11 @@ export default function AdminEvents({
         <div className="ae-review-top"><div><strong>{submission.title}</strong><small>Submitted by @{submission.creatorUsername} · {submission.difficulty || 'Unspecified'} · {submission.points || 0} CP</small></div><span className={'ae-review-status ' + submission.status.toLowerCase().replace(/\s+/g, '-')}>{submission.status}</span></div>
         <p>{submission.description || 'No description provided.'}</p>
         <div className="ae-review-meta"><span>{submission.questionCount || 0} questions</span><span>{submission.isPremium ? 'Premium' : 'Free'}</span>{submission.tags?.map(tag => <span key={tag}>#{tag}</span>)}</div>
+        <details className="ae-review-details"><summary>Inspect modules, questions and expected answers</summary>
+          {(submission.modules || []).map((module, moduleIndex) => <div className="ae-review-module" key={moduleIndex}><strong>Module {moduleIndex + 1}: {module.title}</strong><p>{module.description}</p>
+            {(module.questions || []).map((question, questionIndex) => <div className="ae-review-question" key={questionIndex}><b>Q{questionIndex + 1}. {question.title || 'Untitled question'} · {question.points} CP</b><p>{question.description}</p><small>Expected answer: <code>{question.answer || 'Not provided'}</code></small></div>)}
+          </div>)}
+        </details>
         {submission.status === 'Pending review' && <><label className="ae-review-feedback">Feedback for creator<textarea value={reviewNotes[submission.id] || ''} onChange={event => setReviewNotes(prev => ({ ...prev, [submission.id]: event.target.value }))} placeholder="Explain what should be corrected if you request changes..."/></label><div className="ae-review-actions"><button className="secondary-button" onClick={() => reviewSubmission(submission, 'Changes requested')}>Request changes</button><button className="primary-button" onClick={() => reviewSubmission(submission, 'Approved')}><Check size={15}/> Approve challenge</button></div></>}
         {submission.status === 'Changes requested' && submission.reviewFeedback && <div className="ae-review-note">Last feedback: {submission.reviewFeedback}</div>}
         {submission.status === 'Approved' && <div className="ae-approved-note"><Check size={14}/> Approved for this event. The creator submission record is retained.</div>}
