@@ -7,6 +7,7 @@ import { getVisibleNavGroups } from './navigation.js';
 import Sidebar from '../components/layout/Sidebar.jsx';
 import Topbar from '../components/layout/Topbar.jsx';
 import Dashboard from '../features/player/Dashboard.jsx';
+import CreatorDashboard from '../features/creator/CreatorDashboard.jsx';
 import { Sparkles, X } from 'lucide-react';
 import { challenges } from '../data/index.js';
 import { initialManagedEvents } from '../data/managedEvents.js';
@@ -37,7 +38,7 @@ function App() {
   };
   const visibleNavGroups = getVisibleNavGroups(role);
   const switchRole = () => { const next = role === 'player' ? 'creator' : role === 'creator' ? 'admin' : 'player'; setRole(next); setActive(next === 'player' ? 'Overview' : next === 'creator' ? 'Creator Dashboard' : 'Admin Dashboard'); setNotice('Demo workspace: ' + next + '. Real permissions will be enforced by the backend.'); setDetail(null); };
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [notice, setNotice] = useState('');
@@ -85,7 +86,7 @@ function App() {
           {role === 'admin' && active === 'Events' ? <AdminEvents events={managedEvents} onEventsChange={setManagedEvents} eventChallenges={eventChallenges} onReviewEventChallenge={reviewEventChallenge} /> :
             ['About','Guidelines','Settings','Subscriptions'].includes(active) ? <InfoPage page={active} role={role} onNotice={setNotice}/> :
             active === 'Overview' && role === 'player' ? <Dashboard onNavigate={selectPage} bookmarks={bookmarks} onToggleBookmark={toggleBookmark}/> :
-            active === 'Creator Dashboard' ? <div className="panel"><h1>Creator dashboard</h1><p>Manage your own challenges and learning paths.</p><button className="primary-button" onClick={() => selectPage('Creator Studio')}>Open Creator Studio</button></div> :
+            active === 'Creator Dashboard' ? <CreatorDashboard items={creatorItems} assignedEvents={assignedEvents} eventChallenges={eventChallenges} onNavigate={selectPage} /> :
             active === 'Admin Dashboard' ? <div className="panel"><h1>Admin dashboard</h1><p>Manage events, assign creators, review content and configure subscriptions. Admin tools are prototype placeholders.</p><div className="admin-dashboard-links"><button className="secondary-button" onClick={()=>selectPage('Events')}>Manage events</button><button className="secondary-button" onClick={()=>selectPage('Subscriptions')}>Manage subscriptions</button><button className="secondary-button" onClick={()=>selectPage('Creators')}>Manage creators</button></div></div> :
             <PageView page={active} onNavigate={selectPage} filteredChallenges={filteredChallenges} detail={detail} creatorItems={creatorItems} setCreatorItems={setCreatorItems} assignedEvents={assignedEvents} creatorUsername={creatorUsername} onSubmitEventChallenge={submitEventChallenge} managedEvents={managedEvents} eventChallenges={eventChallenges} onOpenDetail={(type, item) => { window.history.pushState({ ctfRoot: true, page: active, detail: true }, '', window.location.pathname + window.location.search); setDetail({ type, item }); }} onCloseDetail={() => setDetail(null)} bookmarks={bookmarks} onToggleBookmark={toggleBookmark}/>}
           <footer className="footer"><span>© 2026 CTF Root</span><span><button onClick={()=>selectPage('About')}>About</button><button onClick={()=>selectPage('Guidelines')}>Guidelines</button><a href="#status">System status <i className="status-dot"/></a></span><span>Built for curious minds <span className="footer-heart">♥</span></span></footer>
