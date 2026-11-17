@@ -108,3 +108,5 @@
 
 /* Approved event challenges shown to participants */
 .event-approved-challenges{display:grid;gap:9px;margin:10px 0 18px}.event-approved-challenge{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--border-muted);border-radius:8px;background:var(--surface)}.event-approved-challenge>div{display:flex;flex-direction:column;gap:5px}.event-approved-challenge strong{font-size:11px}.event-approved-challenge small,.event-approved-challenge>span{font-size:9px;color:var(--muted)}
+
+.creator-status.pending-review{background:#d99b4a18;color:#a45b16}.creator-status.changes-requested{background:#d99b4a18;color:#a45b16}.creator-status.approved{background:var(--green-soft);color:var(--green)}.creator-review-feedback{color:#a45b16!important;line-height:1.5}
