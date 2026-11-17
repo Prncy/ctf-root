@@ -104,3 +104,7 @@
 
 /* Creator event assignment and review feedback */
 .creator-assigned-events{padding:17px;margin:0 0 16px}.creator-assigned-events>.muted{font-size:11px;line-height:1.6}.creator-assigned-event-list{display:grid;gap:0}.creator-assigned-event{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--border-muted)}.creator-assigned-event>div{display:flex;flex-direction:column;gap:4px}.creator-assigned-event strong{font-size:11px}.creator-assigned-event small{font-size:10px;color:var(--muted)}.creator-event-publication{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--green);white-space:nowrap}.creator-form-notice{font-size:11px;line-height:1.6}
+
+
+/* Approved event challenges shown to participants */
+.event-approved-challenges{display:grid;gap:9px;margin:10px 0 18px}.event-approved-challenge{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--border-muted);border-radius:8px;background:var(--surface)}.event-approved-challenge>div{display:flex;flex-direction:column;gap:5px}.event-approved-challenge strong{font-size:11px}.event-approved-challenge small,.event-approved-challenge>span{font-size:9px;color:var(--muted)}
