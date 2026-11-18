@@ -1,5 +1,6 @@
 using CTFRoot.Domain.Entities;
 using CTFRoot.Domain.Enums;
+using Xunit;
 
 namespace CTFRoot.UnitTests.Domain;
 
