@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>CTFRoot.Application</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CTFRoot.Domain\CTFRoot.Domain.csproj" />
+  </ItemGroup>
+</Project>
