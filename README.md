@@ -32,15 +32,19 @@ npm run build
 - Challenge discovery
 - Learning paths and progress
 - Individual and team events
-- Creator discovery and workspace (in progress)
+- Creator discovery and workspace
 - Leaderboards
 - Vault interface (demo state)
 - Subscription page (Coming Soon)
 
 ## Theme
 
-The visual direction takes inspiration from GitHub's clean surfaces, restrained borders, readable typography and green accent palette, while establishing a distinct CTF Root identity.
+The visual direction uses a dark-first interface with ice-blue and cyan accents, deep navy surfaces, restrained borders and readable typography.
 
-## Planned backend
+## Backend plan
 
-The backend will be implemented in C# after the initial frontend and seed-data workflows are established.
+The backend is planned in C# with ASP.NET Core Web API, SQL Server and Entity Framework Core. The implementation will follow a phased approach, beginning with the core API, persistence, authentication and authorization.
+
+See [Backend Architecture & Implementation Plan](docs/backend/ARCHITECTURE.md) for the proposed domain model, API map, security rules, infrastructure decisions and implementation roadmap.
+
+The backend is not implemented yet. The current frontend still uses demonstration data.
