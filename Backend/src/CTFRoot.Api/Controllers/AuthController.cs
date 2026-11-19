@@ -99,6 +99,31 @@ public sealed class AuthController(
         return Ok(token);
     }
 
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> Me()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        return Ok(new
+        {
+            user.Id,
+            user.Email,
+            user.DisplayName,
+            roles = await userManager.GetRolesAsync(user)
+        });
+    }
+
     private async Task<TokenResponse> CreateAccessTokenAsync(ApplicationUser user)
     {
         var issuer = configuration["Jwt:Issuer"]!;
