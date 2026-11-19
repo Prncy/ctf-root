@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>CTFRoot.Api</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CTFRoot.Application\CTFRoot.Application.csproj" />
+    <ProjectReference Include="..\CTFRoot.Infrastructure\CTFRoot.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
