@@ -6,6 +6,7 @@ using CTFRoot.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -150,6 +151,9 @@ public sealed class AuthApiFactory : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
+            // Remove the original AddDbContext options action as well as its cached options.
+            // Otherwise UseSqlServer remains active alongside UseInMemoryDatabase.
+            services.RemoveAll<IDbContextOptionsConfiguration<CTFRootDbContext>>();
             services.RemoveAll<DbContextOptions<CTFRootDbContext>>();
             services.RemoveAll<CTFRootDbContext>();
             services.AddDbContext<CTFRootDbContext>(options =>
