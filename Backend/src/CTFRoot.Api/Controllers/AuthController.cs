@@ -25,25 +25,25 @@ public sealed class AuthController(
     public async Task<IActionResult> Register(RegisterRequest request)
     {
         var email = request.Email.Trim();
+        var displayName = request.DisplayName.Trim();
+
+        if (string.IsNullOrWhiteSpace(displayName))
+        {
+            return BadRequest(new { message = "Display name is required." });
+        }
+
         var user = new ApplicationUser
         {
             UserName = email,
             Email = email,
-            DisplayName = request.DisplayName.Trim()
+            DisplayName = displayName
         };
 
         var createResult = await userManager.CreateAsync(user, request.Password);
         if (!createResult.Succeeded)
         {
-            return BadRequest(new
-            {
-                message = "The account could not be created.",
-                errors = createResult.Errors.Select(error => new
-                {
-                    code = error.Code,
-                    description = error.Description
-                })
-            });
+            // Keep account-existence and password-policy details out of the public response.
+            return BadRequest(new { message = "The account could not be created. Check the details and try again." });
         }
 
         var playerRole = await roleManager.FindByNameAsync(CTFRootRoles.Player);
