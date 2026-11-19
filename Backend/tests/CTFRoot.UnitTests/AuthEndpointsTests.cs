@@ -131,6 +131,12 @@ public sealed class AuthApiFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // WebApplicationFactory host settings are applied before Program reads configuration.
+        builder.UseSetting("ConnectionStrings:CTFRoot", "Server=not-used-in-tests");
+        builder.UseSetting("Jwt:Issuer", "CTFRoot.Tests");
+        builder.UseSetting("Jwt:Audience", "CTFRoot.Tests.Client");
+        builder.UseSetting("Jwt:SigningKey", "test-only-signing-key-that-is-longer-than-32-bytes");
+
         builder.ConfigureAppConfiguration((_, configuration) =>
         {
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
