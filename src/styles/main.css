@@ -123,3 +123,42 @@
 .creator-recent-list{display:grid}.creator-recent-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border-muted)}.creator-recent-copy{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}.creator-recent-copy strong{font-size:10px}.creator-recent-copy small{font-size:9px;color:var(--muted)}
 @media(max-width:900px){.creator-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.creator-dashboard-main-grid{grid-template-columns:1fr}.creator-dashboard-emblem{width:120px;height:120px}}
 @media(max-width:600px){.creator-dashboard-hero{padding:22px 18px}.creator-dashboard-hero h1{font-size:24px}.creator-dashboard-emblem{display:none}.creator-dashboard-section-head{align-items:flex-start;flex-direction:column}.creator-dashboard-updated{font-size:8px}}
+
+/* Public and authentication screens use the same dark, ice-blue palette as the app by default. */
+.public-home,
+.auth-screen {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface-soft: #21262d;
+  --border: #30363d;
+  --border-muted: #262c36;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --subtle: #6e7681;
+  --green: #62d8ff;
+  --green-soft: #102b3e;
+  --blue: #58a6ff;
+  --blue-soft: #102840;
+  --shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+.public-home { background: var(--bg); color: var(--text); }
+.auth-screen { background: var(--bg); color: var(--text); }
+.public-orbit { border-color: rgba(98,216,255,.22); }
+.public-terminal {
+  border-color: #24627b;
+  background: #071d2b;
+  color: #eaf8ff;
+}
+.terminal-dots i { background: #397d98; }
+.terminal-muted { color: #8bcde4; }
+.public-terminal code { color: #c5e9f5; }
+.public-terminal code b,
+.terminal-cursor { color: #62d8ff; }
+.public-float { border-color: var(--border); }
+.public-feature-grid article { background: var(--surface); border-color: var(--border); }
+.public-cta { background: var(--surface-soft); border-color: var(--border); }
+.auth-card { background: var(--surface); border-color: var(--border); }
+.auth-card input { background: var(--surface-soft); border-color: var(--border); color: var(--text); }
+.auth-card input::placeholder { color: var(--subtle); }
+.auth-card form label { color: var(--text); }
+.auth-card .primary-button { color: #062033; }
