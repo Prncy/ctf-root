@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Shield, ArrowRight, Code2, Users, Flag, Trophy, BookOpen } from 'lucide-react';
+import { clearAuthToken, getCurrentUser, loginAccount, registerAccount, storeAuthToken } from '../../services/authApi.js';
 
 export function PublicHome({ onLogin, onRegister }) {
   return <div className="public-home">
@@ -9,10 +10,6 @@ export function PublicHome({ onLogin, onRegister }) {
     <section className="public-cta" id="how-it-works"><div><div className="eyebrow">YOUR NEXT STEP</div><h2>Curiosity is a good place to start.</h2><p>Create an account and begin your cybersecurity journey with CTF Root.</p></div><button className="primary-button" onClick={onRegister}>Join CTF Root <ArrowRight size={15}/></button></section></main><footer className="public-footer"><span>© 2026 CTF Root</span><span>Built for curious minds <b>♥</b></span></footer>
   </div>;
 }
-
-import { useState } from 'react';
-import { Shield, ArrowRight } from 'lucide-react';
-import { clearAuthToken, getCurrentUser, loginAccount, registerAccount, storeAuthToken } from '../../services/authApi.js';
 
 export function AuthPage({ initialMode = 'login', onSuccess, onSwitch }) {
   const [mode, setMode] = useState(initialMode);
