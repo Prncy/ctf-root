@@ -106,6 +106,7 @@ function App() {
   </>;
 
   return (
+    <>
     <div className={dark ? 'app dark' : 'app'}>
       <Sidebar
         visibleNavGroups={visibleNavGroups}
@@ -134,6 +135,7 @@ function App() {
       </main>}
     </div>
     <ConfirmDialog open={!!confirmation} title={confirmation?.title} description={confirmation?.description} confirmLabel={confirmation?.confirmLabel} tone={confirmation?.tone} onCancel={() => setConfirmation(null)} onConfirm={() => confirmation?.onConfirm?.()} />
+    </>
   );
 }
 
