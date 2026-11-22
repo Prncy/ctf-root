@@ -1,5 +1,4 @@
-import { ArrowRight, ChevronDown, LifeBuoy, Settings, Shield, X } from 'lucide-react';
-import { currentUser } from '../../data/index.js';
+import { ArrowRight, LifeBuoy, Settings, Shield, X } from 'lucide-react';
 
 export default function Sidebar({
   visibleNavGroups,
@@ -7,11 +6,14 @@ export default function Sidebar({
   role,
   sidebarOpen,
   setSidebarOpen,
-  switchRole,
+  user,
   selectPage,
   setNotice,
   signOut,
 }) {
+  const displayName = user?.displayName || user?.email || 'CTF Root member';
+  const initials = displayName.slice(0, 2).toUpperCase();
+  const roleLabel = role === 'admin' ? 'Admin workspace' : role === 'creator' ? 'Creator workspace' : 'Player workspace';
   return (
     <>
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
@@ -20,11 +22,11 @@ export default function Sidebar({
           <span className="brand-name">ctf<span>root</span></span>
           <button className="icon-button mobile-close" onClick={() => setSidebarOpen(false)} aria-label="Close menu"><X size={18}/></button>
         </div>
-        <button className="workspace-switch" onClick={switchRole} title="Switch demo workspace">
-          <div className="workspace-avatar">CS</div>
-          <div className="workspace-copy"><strong>{currentUser.name}</strong><span>{role === 'player' ? 'Player workspace' : role === 'creator' ? 'Creator workspace' : 'Admin workspace'}</span></div>
-          <ChevronDown size={15}/>
-        </button>
+        <div className="workspace-switch" aria-label={roleLabel}>
+          <div className="workspace-avatar">{initials}</div>
+          <div className="workspace-copy"><strong>{displayName}</strong><span>{roleLabel}</span></div>
+          <Shield size={15}/>
+        </div>
         <div className="sidebar-scroll">
           {visibleNavGroups.map(group => <div className="nav-group" key={group.title}>
             <div className="nav-heading">{group.title}</div>
@@ -40,7 +42,7 @@ export default function Sidebar({
         </div>
         <div className="sidebar-bottom">
           <div className="help-card"><div className="help-icon"><LifeBuoy size={17}/></div><strong>Need a hand?</strong><p>Explore the guide and get started with CTF Root.</p><button onClick={() => setNotice('The CTF Root guide is coming soon.')}>Open guide <ArrowRight size={13}/></button></div>
-          <div className="sidebar-user"><div className="avatar">CS</div><div className="user-meta"><strong>{currentUser.name}</strong><span>Level 08 · {currentUser.level}</span></div><button className="icon-button" aria-label="Settings" onClick={() => selectPage('Settings')}><Settings size={17}/></button></div>
+          <div className="sidebar-user"><div className="avatar">{initials}</div><div className="user-meta"><strong>{displayName}</strong><span>{roleLabel}</span></div><button className="icon-button" aria-label="Settings" onClick={() => selectPage('Settings')}><Settings size={17}/></button></div>
           <button className="auth-signout" onClick={signOut}>Sign out</button>
         </div>
       </aside>
