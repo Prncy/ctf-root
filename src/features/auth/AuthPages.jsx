@@ -10,15 +10,76 @@ export function PublicHome({ onLogin, onRegister }) {
   </div>;
 }
 
-export function AuthPage({ initialMode = 'login', onSuccess, onSwitch }) {
-  const [mode,setMode] = useState(initialMode);
-  const [email,setEmail] = useState('');
-  const [password,setPassword] = useState('');
-  const [username,setUsername] = useState('');
-  const [confirm,setConfirm] = useState('');
-  const [error,setError] = useState('');
-  const submit = (e) => { e.preventDefault(); setError(''); if(!email.trim()||!password.trim()) return setError('Enter your email and password.'); if(mode==='register'&&(!username.trim()||password!==confirm)) return setError('Add a username and make sure both passwords match.'); onSuccess(); };
-  const changeMode = next => { setMode(next); onSwitch(next); setError(''); };
-  return <div className="auth-screen"><div className="auth-card"><div className="auth-brand"><span className="brand-mark"><Shield size={20}/></span><span className="brand-name">ctf<span>root</span></span></div><div className="eyebrow">{mode==='login'?'WELCOME BACK':'JOIN THE COMMUNITY'}</div><h1>{mode==='login'?'Sign in to CTF Root':'Create your account'}</h1><p>{mode==='login'?'Continue your cybersecurity learning journey.':'Start learning, solving challenges and tracking your progress.'}</p><form onSubmit={submit}>{mode==='register'&&<label>Username<input value={username} onChange={e=>setUsername(e.target.value)} placeholder="Choose a username" required/></label>}<label>Email address<input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" required/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password" required/></label>{mode==='register'&&<label>Confirm password<input type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Repeat your password" required/></label>}{error&&<p className="auth-error">{error}</p>}<button className="primary-button" type="submit">{mode==='login'?'Sign in':'Create account'} <ArrowRight size={15}/></button></form><div className="auth-switch">{mode==='login'?"Don't have an account?":"Already have an account?"} <button onClick={()=>changeMode(mode==='login'?'register':'login')}>{mode==='login'?'Register':'Sign in'}</button></div><small className="auth-demo-note">Demo interface only. Account creation, password security and authentication will be connected to the backend.</small></div></div>;
-}
+import { useState } from 'react';
+import { Shield, ArrowRight } from 'lucide-react';
+import { clearAuthToken, getCurrentUser, loginAccount, registerAccount, storeAuthToken } from '../../services/authApi.js';
 
+export function AuthPage({ initialMode = 'login', onSuccess, onSwitch }) {
+  const [mode, setMode] = useState(initialMode);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setError('');
+    if (mode === 'register' && password !== confirm) {
+      setError('Your passwords do not match.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const tokenResponse = mode === 'register'
+        ? await registerAccount({ email: email.trim(), displayName: displayName.trim(), password })
+        : await loginAccount({ email: email.trim(), password });
+      if (!tokenResponse?.accessToken) {
+        throw new Error('The server returned an unexpected authentication response.');
+      }
+      storeAuthToken(tokenResponse.accessToken);
+      try {
+        const user = await getCurrentUser(tokenResponse.accessToken);
+        onSuccess(user);
+      } catch (profileError) {
+        clearAuthToken();
+        throw profileError;
+      }
+    } catch (requestError) {
+      setError(requestError.message || 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const changeMode = (next) => {
+    setMode(next);
+    setError('');
+    setPassword('');
+    setConfirm('');
+    onSwitch(next);
+  };
+
+  return <div className="auth-screen">
+    <div className="auth-card">
+      <div className="auth-brand"><span className="brand-mark"><Shield size={20}/></span><span className="brand-name">ctf<span>root</span></span></div>
+      <div className="eyebrow">{mode === 'login' ? 'WELCOME BACK' : 'JOIN THE COMMUNITY'}</div>
+      <h1>{mode === 'login' ? 'Sign in to CTF Root' : 'Create your account'}</h1>
+      <p>{mode === 'login' ? 'Continue your cybersecurity learning journey.' : 'Start learning, solving challenges and tracking your progress.'}</p>
+      <form onSubmit={submit}>
+        {mode === 'register' && <label>Display name<input value={displayName} onChange={event => setDisplayName(event.target.value)} placeholder="How should we address you?" minLength={2} maxLength={100} autoComplete="name" required/></label>}
+        <label>Email address<input type="email" value={email} onChange={event => setEmail(event.target.value)} placeholder="you@example.com" maxLength={254} autoComplete="email" required/></label>
+        <label>Password<input type="password" value={password} onChange={event => setPassword(event.target.value)} placeholder="Enter your password" minLength={mode === 'register' ? 12 : 1} maxLength={128} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required/></label>
+        {mode === 'register' && <>
+          <small className="auth-password-hint">Use at least 12 characters, including uppercase, lowercase, a number and a symbol.</small>
+          <label>Confirm password<input type="password" value={confirm} onChange={event => setConfirm(event.target.value)} placeholder="Repeat your password" minLength={12} maxLength={128} autoComplete="new-password" required/></label>
+        </>}
+        {error && <p className="auth-error" role="alert">{error}</p>}
+        <button className="primary-button" type="submit" disabled={loading}>{loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'} {!loading && <ArrowRight size={15}/>}</button>
+      </form>
+      <div className="auth-switch">{mode === 'login' ? "Don't have an account?" : 'Already have an account?'} <button type="button" onClick={() => changeMode(mode === 'login' ? 'register' : 'login')} disabled={loading}>{mode === 'login' ? 'Register' : 'Sign in'}</button></div>
+      <small className="auth-demo-note">Your account is managed by ASP.NET Core Identity. Sign-in sessions currently last for this browser tab.</small>
+    </div>
+  </div>;
+}
