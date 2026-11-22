@@ -28,7 +28,7 @@ dotnet build CTFRoot.sln --configuration Release --no-restore
 dotnet test CTFRoot.sln --configuration Release --no-build
 ```
 
-The API exposes `/health`. Database and authentication services are registered when a connection string is supplied. Without database configuration, the health endpoint can run, but the authentication endpoints are not available for use.
+The API exposes `/health`. Database and authentication services are registered when a connection string is supplied. Without database configuration, the health endpoint can run, but the authentication endpoints are not available for use. The API uses a configurable CORS allowlist for the deployed GitHub Pages origin and local Vite development.
 
 ## Local SQL Server connection
 
@@ -45,6 +45,10 @@ Adjust the server name and authentication options to match your SQL Server insta
 
 - `Jwt__Issuer`
 - `Jwt__Audience`
+
+## Frontend connection
+
+Set `VITE_API_BASE_URL` in the frontend build environment to the deployed API base URL (without a trailing slash). The frontend reads this value at build time. The API CORS allowlist is configured under `Cors:AllowedOrigins`; override it with environment variables such as `Cors__AllowedOrigins__0`. Never put secrets in frontend environment variables.
 
 ## Authentication endpoints
 

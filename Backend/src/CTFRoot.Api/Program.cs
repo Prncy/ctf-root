@@ -12,6 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("CTFRoot");
 
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? Array.Empty<string>();
+
+if (allowedOrigins.Length > 0)
+{
+    builder.Services.AddCors(options => options.AddPolicy("Frontend", policy =>
+        policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod()));
+}
+
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -95,6 +104,10 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseRateLimiter();
+if (allowedOrigins.Length > 0)
+{
+    app.UseCors("Frontend");
+}
 if (!string.IsNullOrWhiteSpace(connectionString))
 {
     app.UseAuthentication();

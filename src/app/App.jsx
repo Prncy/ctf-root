@@ -11,11 +11,14 @@ import CreatorDashboard from '../features/creator/CreatorDashboard.jsx';
 import { Sparkles, X } from 'lucide-react';
 import { challenges } from '../data/index.js';
 import { initialManagedEvents } from '../data/managedEvents.js';
+import { clearAuthToken, getCurrentUser, getStoredAuthToken } from '../services/authApi.js';
 
 function App() {
   const [active, setActive] = useState('Overview');
   const [authScreen, setAuthScreen] = useState(null);
   const [hasEntered, setHasEntered] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [authUser, setAuthUser] = useState(null);
   const [bookmarks, setBookmarks] = useState({ challenges: ['Cookie Crumble', 'A Very Strange Letter'], paths: ['Introduction to Cybersecurity'] });
   const toggleBookmark = (type, item) => setBookmarks(prev => { const key = type === 'challenge' ? 'challenges' : 'paths'; const saved = prev[key].includes(item.title); return { ...prev, [key]: saved ? prev[key].filter(x => x !== item.title) : [...prev[key], item.title] }; });
   const [role, setRole] = useState('player');
@@ -37,13 +40,42 @@ function App() {
     setCreatorItems(prev => prev.map(item => item.id === id ? { ...item, status, reviewFeedback: feedback } : item));
   };
   const visibleNavGroups = getVisibleNavGroups(role);
-  const switchRole = () => { const next = role === 'player' ? 'creator' : role === 'creator' ? 'admin' : 'player'; setRole(next); setActive(next === 'player' ? 'Overview' : next === 'creator' ? 'Creator Dashboard' : 'Admin Dashboard'); setNotice('Demo workspace: ' + next + '. Real permissions will be enforced by the backend.'); setDetail(null); };
   const [dark, setDark] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [notice, setNotice] = useState('');
   const [detail, setDetail] = useState(null);
   const filteredChallenges = useMemo(() => challenges.filter(c => c.title.toLowerCase().includes(query.toLowerCase())), [query]);
+
+  useEffect(() => {
+    let active = true;
+    const restoreSession = async () => {
+      const token = getStoredAuthToken();
+      if (!token) { if (active) setAuthChecking(false); return; }
+      try {
+        const user = await getCurrentUser(token);
+        if (active) {
+          setAuthUser(user);
+          const roles = (user.roles || []).map(value => value.toLowerCase());
+          setRole(roles.includes('admin') ? 'admin' : roles.includes('creator') ? 'creator' : 'player');
+          setHasEntered(true);
+        }
+      } catch { clearAuthToken(); }
+      finally { if (active) setAuthChecking(false); }
+    };
+    restoreSession();
+    return () => { active = false; };
+  }, []);
+
+  const completeSignIn = user => {
+    setAuthUser(user);
+    const roles = (user.roles || []).map(value => value.toLowerCase());
+    setRole(roles.includes('admin') ? 'admin' : roles.includes('creator') ? 'creator' : 'player');
+    setHasEntered(true);
+    setAuthScreen(null);
+    setActive('Overview');
+    setNotice('Signed in successfully.');
+  };
 
   useEffect(() => {
     window.history.replaceState({ ctfRoot: true, page: active }, '', window.location.pathname + window.location.search);
@@ -63,7 +95,9 @@ function App() {
     setNotice('');
   };
 
-  if (!hasEntered) return authScreen ? <AuthPage initialMode={authScreen} onSuccess={() => { setHasEntered(true); setAuthScreen(null); setNotice('Demo sign-in successful. Connect the backend for real accounts.'); }} onSwitch={setAuthScreen}/> : <PublicHome onLogin={() => setAuthScreen('login')} onRegister={() => setAuthScreen('register')}/>;
+  if (authChecking) return <div className="auth-screen"><div className="auth-card"><p>Checking your CTF Root session…</p></div></div>;
+
+  if (!hasEntered) return authScreen ? <AuthPage initialMode={authScreen} onSuccess={completeSignIn} onSwitch={setAuthScreen}/> : <PublicHome onLogin={() => setAuthScreen('login')} onRegister={() => setAuthScreen('register')}/>;
 
   return (
     <div className={dark ? 'app dark' : 'app'}>
@@ -71,14 +105,14 @@ function App() {
         visibleNavGroups={visibleNavGroups}
         active={active}
         role={role}
+        user={authUser}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        switchRole={switchRole}
         selectPage={selectPage}
         setNotice={setNotice}
-        signOut={() => { setHasEntered(false); setAuthScreen(null); }}
+        signOut={() => { clearAuthToken(); setAuthUser(null); setHasEntered(false); setAuthScreen(null); setRole('player'); setActive('Overview'); }}
       />
-      {authScreen ? <AuthPage initialMode={authScreen} onSuccess={() => { setAuthScreen(null); setNotice('Demo sign-in successful. Connect the backend for real accounts.'); }} onSwitch={setAuthScreen}/> : <main className="main">
+      {authScreen ? <AuthPage initialMode={authScreen} onSuccess={completeSignIn} onSwitch={setAuthScreen}/> : <main className="main">
         <Topbar active={active} query={query} setQuery={setQuery} dark={dark} setDark={setDark} setSidebarOpen={setSidebarOpen} setNotice={setNotice}/>
 
         <div className="content">
