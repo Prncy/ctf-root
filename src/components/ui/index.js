@@ -5,3 +5,5 @@ export { default as EmptyState } from './EmptyState.jsx';
 export { default as StatCard } from './StatCard.jsx';
 export { default as Modal } from './Modal.jsx';
 export { default as Tabs } from './Tabs.jsx';
+export { default as Toast } from './Toast.jsx';
+export { default as ConfirmDialog } from './ConfirmDialog.jsx';

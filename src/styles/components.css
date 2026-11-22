@@ -40,3 +40,19 @@
 .ui-tabs button:hover{color:var(--text)}
 .ui-tabs button.selected{color:var(--text);font-weight:700;border-color:var(--green)}
 @media(max-width:640px){.ui-card-padding-lg{padding:16px}.ui-modal-backdrop{padding:12px}.ui-modal-body{padding:15px}}
+
+
+/* Shared action feedback */
+.app-toast{position:fixed;top:18px;right:18px;z-index:220;width:min(440px,calc(100vw - 32px));display:flex;align-items:center;gap:11px;padding:13px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);box-shadow:0 14px 40px rgba(0,0,0,.32);font-size:12px;line-height:1.5;animation:toast-in .18s ease-out}
+.app-toast>svg{flex:0 0 auto;color:var(--green)}
+.app-toast-error>svg{color:#ff8182}
+.app-toast-info>svg{color:var(--blue)}
+.app-toast span{flex:1;min-width:0}
+.app-toast button{display:grid;place-items:center;flex:0 0 auto;width:28px;height:28px;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer}
+.app-toast button:hover{background:var(--surface-soft);color:var(--text)}
+.ui-confirm-dialog{max-width:460px}
+.ui-confirm-message{display:flex;align-items:flex-start;gap:11px;color:var(--text)}
+.ui-confirm-message p{margin:0;font-size:12px;line-height:1.65;color:var(--muted)}
+.ui-confirm-danger>svg{flex:0 0 auto;color:#ff8182;margin-top:1px}
+@keyframes toast-in{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:640px){.app-toast{top:10px;right:10px;width:calc(100vw - 20px)}}

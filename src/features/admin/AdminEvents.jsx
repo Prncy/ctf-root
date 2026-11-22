@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { ArrowLeft, Bell, CalendarClock, Check, ChevronRight, CirclePlay, Plus, Send, Shield, Trash2, Trophy, Users, X, Eye, RefreshCw, ClipboardCheck } from 'lucide-react';
 import { creators } from '../../data/index.js';
 import './admin-events.css';
+import ConfirmDialog from '../../components/ui/ConfirmDialog.jsx';
 
 export default function AdminEvents({
   events = [],
@@ -14,6 +15,7 @@ export default function AdminEvents({
   const [tab, setTab] = useState('Overview');
   const [notice, setNotice] = useState('');
   const [reviewNotes, setReviewNotes] = useState({});
+  const [confirmation, setConfirmation] = useState(null);
   const [form, setForm] = useState({ name: '', format: 'Individual', date: '', time: '09:00', teamLimit: '', tournament: false, rounds: ['Qualifiers', 'Final'] });
   const selected = events.find(event => event.id === selectedId);
   const selectedSubmissions = eventChallenges.filter(item => String(item.eventId) === String(selectedId));
@@ -52,12 +54,28 @@ export default function AdminEvents({
     setNotice(creatorName(username) + ' assigned to ' + selected.name + '. They can now select this event in Creator Studio.');
   };
   const removeCreator = username => {
-    patchSelected({ assignedCreators: (selected.assignedCreators || []).filter(value => value !== username) });
-    setNotice(creatorName(username) + ' removed from this event. Previously submitted challenges remain linked to the event.');
+    setConfirmation({
+      title: 'Remove this creator?',
+      description: creatorName(username) + ' will lose access to prepare new challenges for ' + selected.name + '. Existing submissions will remain linked to the event.',
+      confirmLabel: 'Remove creator',
+      onConfirm: () => {
+        patchSelected({ assignedCreators: (selected.assignedCreators || []).filter(value => value !== username) });
+        setNotice(creatorName(username) + ' removed from this event.');
+        setConfirmation(null);
+      },
+    });
   };
   const removeTeam = name => {
-    patchSelected({ teams: selected.teams.filter(team => team.name !== name) });
-    setNotice(name + ' removed from the event.');
+    setConfirmation({
+      title: 'Remove this participant or team?',
+      description: name + ' will be removed from the event registration list. This prototype action cannot be undone.',
+      confirmLabel: 'Remove',
+      onConfirm: () => {
+        patchSelected({ teams: selected.teams.filter(team => team.name !== name) });
+        setNotice(name + ' removed from the event.');
+        setConfirmation(null);
+      },
+    });
   };
   const sendAnnouncement = event => {
     event.preventDefault();
@@ -92,10 +110,10 @@ export default function AdminEvents({
     <button className="ae-back" onClick={() => setSelectedId(null)}><ArrowLeft size={15}/> All events</button>
     <div className="admin-events-head"><div><div className="eyebrow">EVENT CONTROL ROOM</div><h1>{selected.name}</h1><p>{selected.format} competition · {selected.date} · {selected.status} · {publicationStatus}</p></div><div className="ae-head-actions">
       {publicationStatus === 'Published'
-        ? <button className="secondary-button" onClick={() => { patchSelected({ publicationStatus: 'Unpublished' }); setNotice('Event unpublished. Registrations, submissions, scores, creator assignments and rounds have been preserved.'); }}><Eye size={15}/> Unpublish event</button>
-        : <button className="primary-button" onClick={() => { patchSelected({ publicationStatus: 'Published', status: selected.status === 'Draft' ? 'Scheduled' : selected.status }); setNotice('Event published. Existing registrations, submissions and scores have been retained.'); }}><RefreshCw size={15}/> {publicationStatus === 'Draft' ? 'Publish event' : 'Republish event'}</button>}
+        ? <button className="secondary-button" onClick={() => setConfirmation({ title: 'Unpublish this event?', description: 'Participants will no longer see or join this event while it is unpublished. Registrations, submissions, scores, creator assignments and rounds will be preserved.', confirmLabel: 'Unpublish event', onConfirm: () => { patchSelected({ publicationStatus: 'Unpublished' }); setNotice('Event unpublished. Existing event data has been preserved.'); setConfirmation(null); } })}><Eye size={15}/> Unpublish event</button>
+        : <button className="primary-button" onClick={() => setConfirmation({ title: publicationStatus === 'Draft' ? 'Publish this event?' : 'Republish this event?', description: 'This will make the event visible to participants. Check that its date, format and approved challenges are ready.', confirmLabel: publicationStatus === 'Draft' ? 'Publish event' : 'Republish event', tone: 'primary', onConfirm: () => { patchSelected({ publicationStatus: 'Published', status: selected.status === 'Draft' ? 'Scheduled' : selected.status }); setNotice('Event published. Existing registrations, submissions and scores have been retained.'); setConfirmation(null); } })}><RefreshCw size={15}/> {publicationStatus === 'Draft' ? 'Publish event' : 'Republish event'}</button>}
       <button className="secondary-button" disabled={publicationStatus !== 'Published'} onClick={() => { patchSelected({ status: 'Scheduled' }); setNotice('Event scheduled.'); }}><CalendarClock size={15}/> Schedule</button>
-      <button className="primary-button" disabled={publicationStatus !== 'Published'} onClick={() => { patchSelected({ status: 'Live' }); setNotice('Event started. Participants can now see it as live.'); }}><CirclePlay size={15}/> Start event</button>
+      <button className="primary-button" disabled={publicationStatus !== 'Published'} onClick={() => setConfirmation({ title: 'Start this event now?', description: 'The event status will change to Live. Participants may begin competing as soon as the backend event workflow is connected.', confirmLabel: 'Start event', tone: 'primary', onConfirm: () => { patchSelected({ status: 'Live' }); setNotice('Event started. Participants can now see it as live.'); setConfirmation(null); } })}><CirclePlay size={15}/> Start event</button>
     </div></div>
     {notice && <div className="ae-notice">{notice}<button onClick={() => setNotice('')}><X size={14}/></button></div>}
     {publicationStatus === 'Unpublished' && <div className="ae-warning"><Shield size={15}/> This event is temporarily unpublished. Its existing data is preserved while you make corrections.</div>}
@@ -123,5 +141,6 @@ export default function AdminEvents({
     {tab === 'Announcements' && <form className="ae-panel ae-announcement" onSubmit={sendAnnouncement}><h3>Send event announcement</h3><p>Compose a message for participants registered to this event.</p><textarea name="message" required placeholder="Write an announcement for registered participants..."/><button className="primary-button"><Send size={15}/> Prepare announcement</button><small>Demo only: messages are not delivered until notifications are connected to the backend.</small></form>}
     {tab === 'Participants' && <div className="ae-panel"><h3>Registered participants</h3>{selected.teams.length ? selected.teams.map(team => <div className="ae-assign-row" key={team.name}><span><strong>{team.name}</strong><small>{team.members} members</small></span><button className="ae-remove" onClick={() => removeTeam(team.name)}><Trash2 size={14}/> Remove</button></div>) : <p className="ae-empty">No registrations yet. Participant and team registration will be connected to the backend.</p>}</div>}
     <p className="ae-demo-note">This is shared frontend demo state. Event assignments, reviews and publication changes are not persisted to a server yet. Unpublishing changes only publication status; it does not delete registrations, submissions, scores, rounds or creator assignments.</p>
+    <ConfirmDialog open={!!confirmation} title={confirmation?.title} description={confirmation?.description} confirmLabel={confirmation?.confirmLabel} onCancel={() => setConfirmation(null)} onConfirm={() => confirmation?.onConfirm?.()} />
   </section>;
 }

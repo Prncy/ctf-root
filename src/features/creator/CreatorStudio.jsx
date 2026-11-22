@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Shield, Flag, BookOpen, ChevronDown, ChevronRight, FolderKanban } from 'lucide-react';
+import ConfirmDialog from '../../components/ui/ConfirmDialog.jsx';
 
 export default function CreatorStudio({ items, setItems, assignedEvents = [], creatorUsername = 'cyberscythe', onSubmitEventChallenge = () => {} }) {
   const blankQuestion = () => ({ title: '', description: '', answer: '', points: '50', attemptPolicy: 'unlimited', maxAttempts: '3', deduction: '20', hints: [''] });
@@ -10,12 +11,42 @@ export default function CreatorStudio({ items, setItems, assignedEvents = [], cr
   const [editorOpen, setEditorOpen] = useState(false);
   const [form, setForm] = useState(blank);
   const [message, setMessage] = useState('');
+  const [confirmation, setConfirmation] = useState(null);
   const [expandedModules, setExpandedModules] = useState([true]);
   const [expandedQuestions, setExpandedQuestions] = useState([[true]]);
   const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
   const updateModule = (mi, key, value) => setForm(prev => ({ ...prev, modules: prev.modules.map((m,i) => i === mi ? { ...m, [key]: value } : m) }));
   const updateQuestion = (mi, qi, key, value) => setForm(prev => ({ ...prev, modules: prev.modules.map((m,i) => i !== mi ? m : { ...m, questions: m.questions.map((q,j) => j === qi ? { ...q, [key]: value } : q) }) }));
   const updateHint = (mi, qi, hi, value) => setForm(prev => ({ ...prev, modules: prev.modules.map((m,i) => i !== mi ? m : { ...m, questions: m.questions.map((q,j) => j !== qi ? q : { ...q, hints: q.hints.map((h,k) => k === hi ? value : h) }) }) }));
+
+  const requestRemoveModule = mi => {
+    const moduleTitle = form.modules[mi]?.title || 'this module';
+    setConfirmation({
+      title: 'Remove this module?',
+      description: '“' + moduleTitle + '” and all questions inside it will be removed from this draft. This cannot be undone.',
+      confirmLabel: 'Remove module',
+      onConfirm: () => {
+        update('modules', form.modules.filter((_, index) => index !== mi));
+        setExpandedModules(prev => prev.filter((_, index) => index !== mi));
+        setExpandedQuestions(prev => prev.filter((_, index) => index !== mi));
+        setConfirmation(null);
+      },
+    });
+  };
+
+  const requestRemoveQuestion = (mi, qi) => {
+    const questionTitle = form.modules[mi]?.questions[qi]?.title || 'this question';
+    setConfirmation({
+      title: 'Remove this question?',
+      description: '“' + questionTitle + '” and its answer, hints and scoring settings will be removed from this draft. This cannot be undone.',
+      confirmLabel: 'Remove question',
+      onConfirm: () => {
+        updateModule(mi, 'questions', form.modules[mi].questions.filter((_, index) => index !== qi));
+        setExpandedQuestions(prev => prev.map((list, index) => index === mi ? list.filter((_, questionIndex) => questionIndex !== qi) : list));
+        setConfirmation(null);
+      },
+    });
+  };
   const totalPoints = form.modules.reduce((sum,m) => sum + m.questions.reduce((qsum,q) => qsum + (Number(q.points) || 0), 0), 0);
   const startNew = (type) => { setKind(type); setEditing(null); setEditorOpen(true); setForm({ ...blank, modules: [blankModule(1)] }); setExpandedModules([true]); setExpandedQuestions([[true]]); setMessage(''); };
   const editItem = (item) => {
@@ -68,7 +99,7 @@ export default function CreatorStudio({ items, setItems, assignedEvents = [], cr
     setEditing(null); setEditorOpen(false); setForm({ ...blank, modules:[blankModule(1)] });
   };
   const owned = items.filter(x => x.kind === kind);
-  return <div className="page-enter creator-studio">
+  return <><div className="page-enter creator-studio">
     <div className="creator-studio-head"><div><div className="eyebrow">CREATOR STUDIO / YOUR CONTENT</div><h2>Your workspace</h2><p className="subheading">Create and manage only the content you own or have been assigned to an event.</p></div><div className="creator-studio-actions"><button className="primary-button" onClick={() => startNew('Challenge')}><Plus size={15}/> New challenge</button><button className="secondary-button" onClick={() => startNew('Learning Path')}><Plus size={15}/> New learning path</button></div></div>
     <div className="creator-permission-note"><Shield size={16}/><span><strong>Creator access</strong> — You can create, edit, publish and manage your own challenges and learning paths. Event challenges are reviewed by an admin before participants can access them.</span></div>
     <section className="creator-assigned-events panel">
@@ -84,13 +115,13 @@ export default function CreatorStudio({ items, setItems, assignedEvents = [], cr
       <div className="creator-form-grid"><label className="creator-field"><span>Category</span><select value={form.category} onChange={e => update('category',e.target.value)}><option>Web</option><option>Cryptography</option><option>Forensics</option><option>Reverse Engineering</option><option>Miscellaneous</option></select></label><label className="creator-field"><span>Difficulty</span><select value={form.difficulty} onChange={e=>update('difficulty',e.target.value)}><option>Easy</option><option>Medium</option><option>Hard</option></select></label>{kind === 'Challenge' && <label className="creator-field creator-checkbox-field"><span>Premium challenge</span><input type="checkbox" checked={form.isPremium} onChange={e=>update('isPremium',e.target.checked)}/><small>Premium challenges will be marked in Explore. Payment and access control will be connected later.</small></label>}<label className="creator-field"><span>Tags <small>(optional, comma-separated)</small></span><input value={form.tags} onChange={e => update('tags',e.target.value)} placeholder="e.g. XOR, Cryptography, Steganography"/><small>Use tags to hint at secondary knowledge areas. The main category remains {form.category}.</small></label>{kind === 'Challenge' && <label className="creator-field"><span>Event assignment</span><select value={form.eventId} onChange={e => update('eventId',e.target.value)}><option value="">Independent challenge</option>{assignedEvents.map(event => <option key={event.id} value={event.id}>{event.name}</option>)}</select><small>Only events assigned to your creator account are available. Event-linked challenges require admin approval before appearing in the event.</small></label>}</div>
       <div className="creator-section-title"><div><strong>Modules</strong><small>{kind === 'Learning Path' ? 'Build guided modules. Each module can contain multiple learning questions.' : 'Group related questions. Each module can contain multiple questions.'}</small></div><button className="secondary-button" onClick={() => { update('modules',[...form.modules,blankModule(form.modules.length+1)]); setExpandedModules(prev => [...prev,true]); setExpandedQuestions(prev => [...prev,[true]]); }}><Plus size={13}/> Add module</button></div>
       {form.modules.map((module,mi) => <div className="creator-module-editor" key={mi}>
-        <div className="creator-module-head"><button type="button" className="creator-collapse-trigger" aria-expanded={!!expandedModules[mi]} onClick={() => setExpandedModules(prev => prev.map((open,i) => i === mi ? !open : open))}>{expandedModules[mi] ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}<strong>Module {mi+1} · {module.title || 'Untitled module'}</strong><span>{module.questions.length} question{module.questions.length === 1 ? '' : 's'}</span></button>{form.modules.length > 1 && <button className="text-button" onClick={() => { update('modules',form.modules.filter((_,i) => i !== mi)); setExpandedModules(prev => prev.filter((_,i) => i !== mi)); setExpandedQuestions(prev => prev.filter((_,i) => i !== mi)); }}>Remove module</button>}</div>
+        <div className="creator-module-head"><button type="button" className="creator-collapse-trigger" aria-expanded={!!expandedModules[mi]} onClick={() => setExpandedModules(prev => prev.map((open,i) => i === mi ? !open : open))}>{expandedModules[mi] ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}<strong>Module {mi+1} · {module.title || 'Untitled module'}</strong><span>{module.questions.length} question{module.questions.length === 1 ? '' : 's'}</span></button>{form.modules.length > 1 && <button className="text-button" onClick={() => requestRemoveModule(mi)}>Remove module</button>}</div>
         {expandedModules[mi] && <div className="creator-collapsible-content">
         <label className="creator-field"><span>Module title</span><input value={module.title} onChange={e => updateModule(mi,'title',e.target.value)} placeholder="Module title"/></label>
         <label className="creator-field"><span>Module introduction / instructions</span><textarea value={module.description} onChange={e => updateModule(mi,'description',e.target.value)} placeholder="Explain this module."/></label>
         <div className="creator-section-title"><div><strong>Questions ({module.questions.length})</strong><small>Set scoring and attempt rules separately for every question.</small></div><button className="secondary-button" onClick={() => { updateModule(mi,'questions',[...module.questions,blankQuestion()]); setExpandedQuestions(prev => prev.map((list,i) => i === mi ? [...list,true] : list)); }}><Plus size={13}/> Add question</button></div>
         {module.questions.map((q,qi) => <div className="creator-question-editor" key={qi}>
-          <div className="creator-module-head"><button type="button" className="creator-collapse-trigger" aria-expanded={!!expandedQuestions[mi]?.[qi]} onClick={() => setExpandedQuestions(prev => prev.map((list,i) => i === mi ? list.map((open,j) => j === qi ? !open : open) : list))}>{expandedQuestions[mi]?.[qi] ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}<strong>Question {qi+1} · {q.title || 'Untitled question'}</strong><span>{Number(q.points) || 0} CP</span></button>{module.questions.length > 1 && <button className="text-button" onClick={() => { updateModule(mi,'questions',module.questions.filter((_,i) => i !== qi)); setExpandedQuestions(prev => prev.map((list,i) => i === mi ? list.filter((_,j) => j !== qi) : list)); }}>Remove question</button>}</div>
+          <div className="creator-module-head"><button type="button" className="creator-collapse-trigger" aria-expanded={!!expandedQuestions[mi]?.[qi]} onClick={() => setExpandedQuestions(prev => prev.map((list,i) => i === mi ? list.map((open,j) => j === qi ? !open : open) : list))}>{expandedQuestions[mi]?.[qi] ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}<strong>Question {qi+1} · {q.title || 'Untitled question'}</strong><span>{Number(q.points) || 0} CP</span></button>{module.questions.length > 1 && <button className="text-button" onClick={() => requestRemoveQuestion(mi,qi)}>Remove question</button>}</div>
           {expandedQuestions[mi]?.[qi] && <div className="creator-collapsible-content">
           <label className="creator-field"><span>Question title</span><input value={q.title} onChange={e => updateQuestion(mi,qi,'title',e.target.value)} placeholder="e.g. Identify the vulnerable cookie"/></label>
           <label className="creator-field"><span>Question / task description</span><textarea value={q.description} onChange={e => updateQuestion(mi,qi,'description',e.target.value)} placeholder="Describe the task. For learning paths, include the explanation and guidance."/></label>
@@ -110,5 +141,7 @@ export default function CreatorStudio({ items, setItems, assignedEvents = [], cr
       {editing && items.find(item => item.id === editing)?.reviewFeedback && <div className="notice creator-form-notice">Admin feedback: {items.find(item => item.id === editing).reviewFeedback}</div>}
       <div className="creator-editor-footer"><span className="muted">Changes are local demo data and reset on refresh.</span><div><button className="secondary-button" onClick={() => save(false)}>Save draft</button><button className="primary-button" onClick={() => save(true)}>{kind === 'Challenge' && form.eventId ? 'Submit for event review' : 'Publish'}</button></div></div>
     </div>}
-  </div>;
+  </div>
+    <ConfirmDialog open={!!confirmation} title={confirmation?.title} description={confirmation?.description} confirmLabel={confirmation?.confirmLabel} onCancel={() => setConfirmation(null)} onConfirm={() => confirmation?.onConfirm?.()} />
+  </>;
 }

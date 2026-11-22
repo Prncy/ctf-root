@@ -12,6 +12,8 @@ import { Sparkles, X } from 'lucide-react';
 import { challenges } from '../data/index.js';
 import { initialManagedEvents } from '../data/managedEvents.js';
 import { clearAuthToken, getCurrentUser, getStoredAuthToken } from '../services/authApi.js';
+import Toast from '../components/ui/Toast.jsx';
+import ConfirmDialog from '../components/ui/ConfirmDialog.jsx';
 
 function App() {
   const [active, setActive] = useState('Overview');
@@ -44,6 +46,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [notice, setNotice] = useState('');
+  const [confirmation, setConfirmation] = useState(null);
   const [detail, setDetail] = useState(null);
   const filteredChallenges = useMemo(() => challenges.filter(c => c.title.toLowerCase().includes(query.toLowerCase())), [query]);
 
@@ -67,14 +70,14 @@ function App() {
     return () => { active = false; };
   }, []);
 
-  const completeSignIn = user => {
+  const completeSignIn = (user, authMode = 'login') => {
     setAuthUser(user);
     const roles = (user.roles || []).map(value => value.toLowerCase());
     setRole(roles.includes('admin') ? 'admin' : roles.includes('creator') ? 'creator' : 'player');
     setHasEntered(true);
     setAuthScreen(null);
     setActive('Overview');
-    setNotice('Signed in successfully.');
+    setNotice(authMode === 'register' ? 'Your account was created successfully. Welcome to CTF Root!' : 'Signed in successfully. Welcome back.');
   };
 
   useEffect(() => {
@@ -97,9 +100,13 @@ function App() {
 
   if (authChecking) return <div className="auth-screen"><div className="auth-card"><p>Checking your CTF Root session…</p></div></div>;
 
-  if (!hasEntered) return authScreen ? <AuthPage initialMode={authScreen} onSuccess={completeSignIn} onSwitch={setAuthScreen}/> : <PublicHome onLogin={() => setAuthScreen('login')} onRegister={() => setAuthScreen('register')}/>;
+  if (!hasEntered) return <>
+    {authScreen ? <AuthPage initialMode={authScreen} onSuccess={completeSignIn} onSwitch={setAuthScreen}/> : <PublicHome onLogin={() => setAuthScreen('login')} onRegister={() => setAuthScreen('register')}/>}
+    <Toast message={notice} onClose={() => setNotice('')} />
+  </>;
 
   return (
+    <>
     <div className={dark ? 'app dark' : 'app'}>
       <Sidebar
         visibleNavGroups={visibleNavGroups}
@@ -110,13 +117,13 @@ function App() {
         setSidebarOpen={setSidebarOpen}
         selectPage={selectPage}
         setNotice={setNotice}
-        signOut={() => { clearAuthToken(); setAuthUser(null); setHasEntered(false); setAuthScreen(null); setRole('player'); setActive('Overview'); }}
+        signOut={() => setConfirmation({ title: 'Sign out of CTF Root?', description: 'You will be signed out of this browser tab. You can sign in again at any time.', confirmLabel: 'Sign out', tone: 'danger', onConfirm: () => { clearAuthToken(); setAuthUser(null); setHasEntered(false); setAuthScreen(null); setRole('player'); setActive('Overview'); setConfirmation(null); setNotice('You have been signed out.'); } })}
       />
       {authScreen ? <AuthPage initialMode={authScreen} onSuccess={completeSignIn} onSwitch={setAuthScreen}/> : <main className="main">
         <Topbar active={active} query={query} setQuery={setQuery} dark={dark} setDark={setDark} setSidebarOpen={setSidebarOpen} setNotice={setNotice}/>
 
         <div className="content">
-          {notice && <div className="notice"><Sparkles size={16}/><span>{notice}</span><button onClick={() => setNotice('')} aria-label="Dismiss"><X size={15}/></button></div>}
+          <Toast message={notice} onClose={() => setNotice('')} />
           {role === 'admin' && active === 'Events' ? <AdminEvents events={managedEvents} onEventsChange={setManagedEvents} eventChallenges={eventChallenges} onReviewEventChallenge={reviewEventChallenge} /> :
             ['About','Guidelines','Settings','Subscriptions'].includes(active) ? <InfoPage page={active} role={role} onNotice={setNotice}/> :
             active === 'Overview' && role === 'player' ? <Dashboard onNavigate={selectPage} bookmarks={bookmarks} onToggleBookmark={toggleBookmark}/> :
@@ -127,6 +134,8 @@ function App() {
         </div>
       </main>}
     </div>
+    <ConfirmDialog open={!!confirmation} title={confirmation?.title} description={confirmation?.description} confirmLabel={confirmation?.confirmLabel} tone={confirmation?.tone} onCancel={() => setConfirmation(null)} onConfirm={() => confirmation?.onConfirm?.()} />
+    </>
   );
 }
 
