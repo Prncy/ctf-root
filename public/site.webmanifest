@@ -1,0 +1,17 @@
+{
+  "name": "CTF Root",
+  "short_name": "CTF Root",
+  "description": "Learn, hack and grow your cybersecurity skills.",
+  "start_url": "/ctf-root/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "/ctf-root/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
