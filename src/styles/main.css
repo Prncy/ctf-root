@@ -162,3 +162,7 @@
 .auth-card input::placeholder { color: var(--subtle); }
 .auth-card form label { color: var(--text); }
 .auth-card .primary-button { color: #062033; }
+
+/* Authentication form feedback and loading states */
+.auth-password-hint{display:block;color:var(--muted);font-size:10px;line-height:1.5;margin:-5px 0 10px}
+.auth-card form button:disabled,.auth-switch button:disabled{opacity:.6;cursor:wait}
