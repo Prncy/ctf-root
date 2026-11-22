@@ -6,7 +6,7 @@ export default function Toast({ message, onClose, variant = 'success', duration 
     if (!message || duration <= 0) return undefined;
     const timeout = window.setTimeout(() => onClose?.(), duration);
     return () => window.clearTimeout(timeout);
-  }, [message, duration, onClose]);
+  }, [message, duration]);
 
   if (!message) return null;
   const Icon = variant === 'error' ? AlertCircle : variant === 'info' ? Info : CheckCircle2;
