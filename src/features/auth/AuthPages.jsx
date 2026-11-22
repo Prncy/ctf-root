@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Shield, ArrowRight, Code2, Users, Flag, Trophy, BookOpen } from 'lucide-react';
-import { clearAuthToken, getCurrentUser, loginAccount, registerAccount, storeAuthToken } from '../../services/authApi.js';
+import { clearAuthToken, getCurrentUser, isApiConfigured, loginAccount, registerAccount, storeAuthToken } from '../../services/authApi.js';
 
 export function PublicHome({ onLogin, onRegister }) {
   return <div className="public-home">
@@ -19,10 +19,15 @@ export function AuthPage({ initialMode = 'login', onSuccess, onSwitch }) {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const apiConfigured = isApiConfigured();
 
   const submit = async (event) => {
     event.preventDefault();
     setError('');
+    if (!apiConfigured) {
+      setError('Account services are not connected yet. Please try again after the CTF Root API is configured.');
+      return;
+    }
     if (mode === 'register' && password !== confirm) {
       setError('Your passwords do not match.');
       return;
@@ -38,7 +43,7 @@ export function AuthPage({ initialMode = 'login', onSuccess, onSwitch }) {
       storeAuthToken(tokenResponse.accessToken);
       try {
         const user = await getCurrentUser(tokenResponse.accessToken);
-        onSuccess(user);
+        onSuccess(user, mode);
       } catch (profileError) {
         clearAuthToken();
         throw profileError;
@@ -64,6 +69,7 @@ export function AuthPage({ initialMode = 'login', onSuccess, onSwitch }) {
       <div className="eyebrow">{mode === 'login' ? 'WELCOME BACK' : 'JOIN THE COMMUNITY'}</div>
       <h1>{mode === 'login' ? 'Sign in to CTF Root' : 'Create your account'}</h1>
       <p>{mode === 'login' ? 'Continue your cybersecurity learning journey.' : 'Start learning, solving challenges and tracking your progress.'}</p>
+      {!apiConfigured && <p className="auth-error" role="status">Account services are temporarily unavailable while the API is being configured. You cannot create an account or sign in yet.</p>}
       <form onSubmit={submit}>
         {mode === 'register' && <label>Display name<input value={displayName} onChange={event => setDisplayName(event.target.value)} placeholder="How should we address you?" minLength={2} maxLength={100} autoComplete="name" required/></label>}
         <label>Email address<input type="email" value={email} onChange={event => setEmail(event.target.value)} placeholder="you@example.com" maxLength={254} autoComplete="email" required/></label>
@@ -73,7 +79,7 @@ export function AuthPage({ initialMode = 'login', onSuccess, onSwitch }) {
           <label>Confirm password<input type="password" value={confirm} onChange={event => setConfirm(event.target.value)} placeholder="Repeat your password" minLength={12} maxLength={128} autoComplete="new-password" required/></label>
         </>}
         {error && <p className="auth-error" role="alert">{error}</p>}
-        <button className="primary-button" type="submit" disabled={loading}>{loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'} {!loading && <ArrowRight size={15}/>}</button>
+        <button className="primary-button" type="submit" disabled={loading || !apiConfigured}>{loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'} {!loading && <ArrowRight size={15}/>}</button>
       </form>
       <div className="auth-switch">{mode === 'login' ? "Don't have an account?" : 'Already have an account?'} <button type="button" onClick={() => changeMode(mode === 'login' ? 'register' : 'login')} disabled={loading}>{mode === 'login' ? 'Register' : 'Sign in'}</button></div>
       <small className="auth-demo-note">Your account is managed by ASP.NET Core Identity. Sign-in sessions currently last for this browser tab.</small>
