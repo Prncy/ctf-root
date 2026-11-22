@@ -18,7 +18,6 @@ export default function ConfirmDialog({
       open={open}
       onClose={busy ? undefined : onCancel}
       title={title}
-      description={description}
       className="ui-confirm-dialog"
       footer={<>
         <Button variant="secondary" onClick={onCancel} disabled={busy}>{cancelLabel}</Button>
